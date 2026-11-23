@@ -25,8 +25,8 @@ function Footer() {
 
   return (
     <footer className="bg-bg-card border-t border-border">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div className="space-y-4">
             <Logo />
@@ -46,7 +46,7 @@ function Footer() {
                 <li key={link.path}>
                   <Link
                     to={link.path}
-                    className="text-text-secondary hover:text-green-primary text-sm transition-colors duration-200"
+                    className="text-text-secondary hover:text-accent text-sm transition-colors duration-200"
                   >
                     {link.name}
                   </Link>
@@ -69,7 +69,7 @@ function Footer() {
                   rel="noopener noreferrer"
                   aria-label={social.label}
                   className="p-2.5 rounded-lg bg-bg-primary border border-border text-text-secondary
-                             hover:text-green-primary hover:border-green-primary/30 transition-all duration-200"
+                             hover:text-accent hover:border-accent/30 transition-all duration-200"
                 >
                   <social.icon size={18} />
                 </a>
@@ -81,7 +81,7 @@ function Footer() {
                 href="https://www.instagram.com/code2chill.osl/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-text-secondary hover:text-green-primary transition-colors duration-200"
+                className="text-text-secondary hover:text-accent transition-colors duration-200"
               >
                 @code2chill.osl
               </a>{' '}
@@ -91,12 +91,12 @@ function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="mt-8 pt-5 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-text-muted text-xs">
             &copy; {currentYear} Code2Chill. All rights reserved.
           </p>
           <p className="text-text-muted text-xs">
-            Built with <span className="text-green-primary">&#9829;</span> by the Code2Chill community
+            Built with <span className="text-accent">&#9829;</span> by the Code2Chill community
           </p>
         </div>
       </div>

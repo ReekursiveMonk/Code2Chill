@@ -6,11 +6,11 @@ function NotFound() {
   const { pathname } = useLocation();
 
   return (
-    <div className="pt-24 pb-20 min-h-[70vh] flex items-center">
+    <div className="pt-24 pb-14 min-h-[60vh] flex items-center">
       <section className="w-full px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           {/* Error code */}
-          <p className="text-center font-mono font-bold text-6xl sm:text-7xl text-green-primary text-glow-green mb-6">
+          <p className="animate-enter text-center font-mono font-bold text-6xl sm:text-7xl text-accent mb-4">
             404
           </p>
 
@@ -21,23 +21,23 @@ function NotFound() {
           />
 
           {/* Requested path */}
-          <div className="max-w-md mx-auto -mt-4 mb-10 p-4 rounded-xl bg-bg-card border border-border font-mono text-xs sm:text-sm">
+          <div className="animate-enter enter-delay-1 max-w-md mx-auto mb-8 p-4 rounded-xl bg-bg-card border border-border font-mono text-xs sm:text-sm">
             <div className="flex items-center gap-2 text-text-muted mb-2">
-              <Terminal size={14} className="text-green-primary" />
+              <Terminal size={14} className="text-accent" />
               <span>request</span>
             </div>
             <p className="text-text-secondary break-all">
-              <span className="text-green-primary">&gt; GET</span> {pathname}
+              <span className="text-accent">&gt; GET</span> {pathname}
             </p>
             <p className="text-text-muted mt-1">404 Not Found</p>
           </div>
 
           {/* Back home */}
-          <div className="flex justify-center">
+          <div className="animate-enter enter-delay-2 flex justify-center">
             <Link
               to="/"
-              className="group inline-flex items-center gap-2 px-7 py-3 rounded-lg bg-green-primary text-bg-primary font-semibold text-sm
-                         hover:bg-green-secondary transition-all duration-200 glow-green-sm"
+              className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-bg-primary font-semibold text-sm
+                         hover:bg-accent-2 transition-colors duration-200"
             >
               <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
               Back to Home

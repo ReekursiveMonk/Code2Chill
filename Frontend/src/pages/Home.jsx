@@ -5,6 +5,7 @@ import {
   Calendar,
   Rocket,
   ArrowRight,
+  ArrowUpRight,
   Terminal,
   Globe,
   Zap,
@@ -12,127 +13,181 @@ import {
   Trophy,
 } from 'lucide-react';
 import SectionHeading from '../components/SectionHeading';
+import Reveal from '../components/Reveal';
+import HeroCanvas from '../components/HeroCanvas';
 import { HOME_STATS } from '../data/stats';
 
-/* ───────── Hero Section ───────── */
+/* Shared styles */
+const container = 'max-w-6xl mx-auto';
+const section = 'py-12 sm:py-16 px-4 sm:px-6 lg:px-8';
+const card = 'h-full rounded-xl border border-border bg-bg-card p-5';
+
+const primaryButton =
+  'group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-accent text-bg-primary font-display font-bold text-base ' +
+  'shadow-[4px_4px_0_0_var(--color-text-primary)] transition-[transform,box-shadow] duration-150 ' +
+  'hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_var(--color-text-primary)] ' +
+  'active:translate-x-0 active:translate-y-0 active:shadow-none';
+
+const secondaryButton =
+  'group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-border text-text-primary font-display font-bold text-base ' +
+  'transition-colors duration-200 hover:border-accent hover:text-accent';
+
+/* ───────── Hero ───────── */
 function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
-      {/* Subtle grid background */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(88,245,132,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(88,245,132,0.3) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-        }}
-      />
+    <section className="px-4 sm:px-6 lg:px-8 pt-28 pb-10 lg:pt-32 lg:pb-12">
+      <div className={`${container} grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center`}>
+        {/* Left: heading, description, buttons */}
+        <div className="lg:col-span-7">
+          <div className="animate-fade-in-up flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
+            <span className="inline-flex items-center px-3 py-1.5 rounded-md border border-text-primary/70 text-text-primary font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.25em]">
+              Chitkara University
+            </span>
+            <span className="inline-flex items-center gap-2 text-xs font-mono font-medium text-accent uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-2" aria-hidden="true" />
+              University Coding Club
+            </span>
+          </div>
 
-      {/* Radial glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-green-primary/5 rounded-full blur-[120px] pointer-events-none" />
+          <h1 className="animate-fade-in-up animate-delay-100 font-bold leading-[0.95] tracking-[-0.045em] text-[clamp(3rem,8vw,6rem)] mb-6">
+            <span className="block text-text-primary">Build.</span>{' '}
+            <span className="block text-accent">Connect.</span>{' '}
+            <span className="block text-outline">Innovate.</span>
+          </h1>
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {/* University */}
-        <p className="animate-fade-in-up mb-5 flex items-center justify-center gap-3 text-[11px] sm:text-xs font-mono font-medium uppercase tracking-[0.3em] text-text-secondary">
-          <span className="h-px w-6 sm:w-10 bg-border" aria-hidden="true" />
-          Chitkara University
-          <span className="h-px w-6 sm:w-10 bg-border" aria-hidden="true" />
-        </p>
+          <p className="animate-fade-in-up animate-delay-200 max-w-xl text-text-secondary text-base sm:text-lg leading-relaxed mb-8">
+            A student-led technical community bringing together programmers,
+            developers and AI enthusiasts. Explore, build and grow — beyond the
+            classroom.
+          </p>
 
-        {/* Badge */}
-        <div className="animate-fade-in-up mb-6">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-mono font-medium text-green-primary bg-green-primary/10 border border-green-primary/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-primary animate-pulse" />
-            University Coding Club
-          </span>
+          <div className="animate-fade-in-up animate-delay-300 flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <Link to="/join" className={primaryButton}>
+              Join the Club
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link to="/projects" className={secondaryButton}>
+              View Projects
+              <ArrowUpRight size={18} />
+            </Link>
+          </div>
         </div>
 
-        {/* Main heading */}
-        <h1 className="animate-fade-in-up animate-delay-100 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight mb-6">
-          <span className="text-text-primary">Build. </span>
-          <span className="text-green-primary text-glow-green">Connect. </span>
-          <span className="text-text-primary">Innovate.</span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="animate-fade-in-up animate-delay-200 text-text-secondary text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-          A student-led technical community bringing together programmers,
-          developers and AI enthusiasts. Explore, build and grow — beyond the
-          classroom.
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="animate-fade-in-up animate-delay-300 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            to="/join"
-            className="group flex items-center gap-2 px-7 py-3 rounded-lg bg-green-primary text-bg-primary font-semibold text-sm
-                       hover:bg-green-secondary transition-all duration-200 glow-green-sm"
-          >
-            Join the Club
-            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-          </Link>
-          <Link
-            to="/projects"
-            className="flex items-center gap-2 px-7 py-3 rounded-lg border border-border text-text-primary font-semibold text-sm
-                       hover:border-green-primary/40 hover:bg-white/5 transition-all duration-200"
-          >
-            View Projects
-          </Link>
-        </div>
-
-        {/* Stats Row */}
-        <div className="animate-fade-in-up animate-delay-400 mt-16 grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto">
-          {HOME_STATS.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <p className="text-2xl sm:text-3xl font-bold text-green-primary font-mono">
-                {stat.value}
-              </p>
-              <p className="text-text-muted text-xs mt-1">{stat.label}</p>
-            </div>
-          ))}
+        {/* Right: developer workspace illustration */}
+        <div className="lg:col-span-5 animate-fade-in-up animate-delay-400">
+          <HeroCanvas className="max-w-[480px] mx-auto lg:mr-0" />
         </div>
       </div>
     </section>
   );
 }
 
-/* ───────── About Section ───────── */
-function About() {
+/* ───────── Statistics ───────── */
+const STAT_DETAILS = {
+  Projects: { icon: Rocket, to: '/projects' },
+  Events: { icon: Calendar, to: '/events' },
+  Workshops: { icon: BookOpen },
+};
+
+function StatCard({ value, label, icon: Icon, highlight = false, sample = false }) {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+    <div
+      className={`flex h-full flex-col justify-between gap-6 rounded-xl border p-5 transition-colors duration-200 ${
+        highlight
+          ? 'border-accent bg-accent text-bg-primary'
+          : 'border-border bg-bg-card text-text-primary group-hover:border-accent/60'
+      }`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span
+          className={`text-[11px] font-mono font-bold uppercase tracking-[0.18em] ${
+            highlight ? '' : 'text-text-muted'
+          }`}
+        >
+          {label}
+        </span>
+        <Icon size={18} aria-hidden="true" className={highlight ? '' : 'text-accent'} />
+      </div>
+      <div>
+        <p className="font-display font-bold text-4xl sm:text-5xl leading-none tracking-[-0.04em]">
+          {value}
+        </p>
+        {sample && <p className="mt-2 text-[11px] font-mono text-text-muted">Sample figure</p>}
+      </div>
+    </div>
+  );
+}
+
+function Stats() {
+  // Members is calculated from the team data in stats.js; the rest are kept as-is.
+  const members = HOME_STATS.find((stat) => stat.label.startsWith('Member'));
+  const others = HOME_STATS.filter((stat) => stat !== members);
+
+  const items = [
+    members && { ...members, icon: Users, to: '/team', highlight: true },
+    ...others.map((stat) => ({ ...stat, ...(STAT_DETAILS[stat.label] || { icon: Zap }) })),
+  ].filter(Boolean);
+
+  return (
+    <section className="pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8">
+      <div className={container}>
+        <ul className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {items.map((item, index) => (
+            <Reveal as="li" key={item.label} delay={index * 60} className="h-full">
+              {item.to ? (
+                <Link to={item.to} className="group block h-full rounded-xl" aria-label={`${item.value} ${item.label}${item.sample ? ' (sample figure)' : ''}`}>
+                  <StatCard {...item} />
+                </Link>
+              ) : (
+                <StatCard {...item} />
+              )}
+            </Reveal>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+/* ───────── About ───────── */
+function About() {
+  const pillars = [
+    {
+      icon: Terminal,
+      title: 'Our Mission',
+      text: 'To create a welcoming space where students can learn, experiment with technology and develop their skills through hands-on projects, workshops and peer collaboration.',
+    },
+    {
+      icon: Rocket,
+      title: 'Our Vision',
+      text: 'To build the most active student developer community on campus — a place where every member ships real code, shares knowledge and grows their technical identity.',
+    },
+  ];
+
+  return (
+    <section className={section}>
+      <div className={container}>
         <SectionHeading
+          align="left"
           badge="About Us"
           title="What is Code2Chill?"
           description="Code2Chill is a university developer community where students collaborate, explore new technologies and build real projects together."
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-          {/* Left — mission card */}
-          <div className="p-6 rounded-xl bg-bg-card border border-border hover:border-green-primary/20 transition-all duration-300">
-            <div className="w-10 h-10 rounded-lg bg-green-primary/10 flex items-center justify-center mb-4">
-              <Terminal size={20} className="text-green-primary" />
-            </div>
-            <h3 className="text-lg font-semibold text-text-primary mb-2">Our Mission</h3>
-            <p className="text-text-secondary text-sm leading-relaxed">
-              To create a welcoming space where students can learn, experiment
-              with technology and develop their skills through hands-on projects,
-              workshops and peer collaboration.
-            </p>
-          </div>
-
-          {/* Right — vision card */}
-          <div className="p-6 rounded-xl bg-bg-card border border-border hover:border-green-primary/20 transition-all duration-300">
-            <div className="w-10 h-10 rounded-lg bg-green-primary/10 flex items-center justify-center mb-4">
-              <Rocket size={20} className="text-green-primary" />
-            </div>
-            <h3 className="text-lg font-semibold text-text-primary mb-2">Our Vision</h3>
-            <p className="text-text-secondary text-sm leading-relaxed">
-              To build the most active student developer community on campus —
-              a place where every member ships real code, shares knowledge and
-              grows their technical identity.
-            </p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {pillars.map((pillar, index) => (
+            <Reveal key={pillar.title} delay={index * 80} className="h-full">
+              <article className={`${card} transition-colors duration-200 hover:border-accent/50`}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 shrink-0 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <pillar.icon size={20} className="text-accent" aria-hidden="true" />
+                  </div>
+                  <h3 className="text-xl font-bold text-text-primary">{pillar.title}</h3>
+                </div>
+                <p className="text-text-secondary text-sm sm:text-base leading-relaxed">{pillar.text}</p>
+              </article>
+            </Reveal>
+          ))}
         </div>
       </div>
     </section>
@@ -145,62 +200,58 @@ function WhatWeDo() {
     {
       icon: Code2,
       title: 'Coding Sessions',
-      description: 'Weekly collaborative coding sessions where members solve problems and build projects together.',
+      description: 'Solve problems and build projects together.',
     },
     {
       icon: Calendar,
       title: 'Tech Events',
-      description: 'Hackathons, tech talks, coding competitions and community meetups throughout the year.',
+      description: 'Explore hackathons, tech talks and community events.',
     },
     {
       icon: BookOpen,
       title: 'Workshops',
-      description: 'Hands-on workshops on web development, AI/ML, open source, and emerging technologies.',
+      description: 'Learn practical skills through hands-on sessions.',
     },
     {
       icon: Users,
       title: 'Mentorship',
-      description: 'Senior members guide juniors through projects, career prep and technical growth.',
+      description: 'Get guidance on projects and technical growth.',
     },
     {
       icon: Globe,
       title: 'Open Source',
-      description: 'Contributing to open-source projects and building tools that solve real-world problems.',
+      description: 'Contribute to projects that solve real problems.',
     },
     {
       icon: Trophy,
       title: 'Competitions',
-      description: 'Representing the club in inter-college hackathons, coding contests and tech challenges.',
+      description: 'Participate in coding contests and hackathons.',
     },
   ];
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-bg-card/50">
-      <div className="max-w-6xl mx-auto">
+    <section className={section}>
+      <div className={container}>
         <SectionHeading
+          align="left"
           badge="What We Do"
           title="Explore, Build and Grow"
           description="From weekly coding sessions to inter-college hackathons — there's always something happening at Code2Chill."
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {activities.map((activity) => (
-            <div
-              key={activity.title}
-              className="group p-5 rounded-xl bg-bg-primary border border-border
-                         hover:border-green-primary/20 transition-all duration-300"
-            >
-              <div className="w-10 h-10 rounded-lg bg-green-primary/10 flex items-center justify-center mb-4
-                              group-hover:bg-green-primary/15 transition-colors">
-                <activity.icon size={20} className="text-green-primary" />
-              </div>
-              <h3 className="text-base font-semibold text-text-primary mb-2">
-                {activity.title}
-              </h3>
-              <p className="text-text-secondary text-sm leading-relaxed">
-                {activity.description}
-              </p>
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {activities.map((activity, index) => (
+            <Reveal key={activity.title} delay={(index % 3) * 60} className="h-full">
+              <article className="flex h-full items-start gap-3 rounded-xl border border-border bg-bg-card p-4 transition-colors duration-200 hover:border-accent/50">
+                <div className="w-9 h-9 shrink-0 rounded-lg bg-accent/10 flex items-center justify-center">
+                  <activity.icon size={18} className="text-accent" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-text-primary leading-tight mb-1">{activity.title}</h3>
+                  <p className="text-text-secondary text-sm leading-snug">{activity.description}</p>
+                </div>
+              </article>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -208,68 +259,28 @@ function WhatWeDo() {
   );
 }
 
-/* ───────── Tech Stack Showcase ───────── */
-function TechStack() {
-  const techs = [
-    'React', 'Node.js', 'Python', 'JavaScript', 'TypeScript',
-    'Tailwind CSS', 'MongoDB', 'Git', 'Docker', 'TensorFlow',
-    'Next.js', 'Express',
-  ];
-
-  return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        <SectionHeading
-          badge="Tech We Love"
-          title="Tools and Technologies"
-          description="Our members work with a wide range of modern technologies across web, mobile, AI and more."
-        />
-
-        <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
-          {techs.map((tech) => (
-            <span
-              key={tech}
-              className="px-4 py-2 rounded-lg bg-bg-card border border-border text-text-secondary text-sm font-mono
-                         hover:border-green-primary/30 hover:text-green-primary transition-all duration-200 cursor-default"
-            >
-              {tech}
-            </span>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ───────── CTA Section ───────── */
+/* ───────── Call to action ───────── */
 function CallToAction() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-bg-card/50">
-      <div className="max-w-3xl mx-auto text-center">
-        <div className="p-8 sm:p-12 rounded-2xl bg-bg-primary border border-border relative overflow-hidden">
-          {/* Accent glow */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-green-primary/60 to-transparent" />
-
-          <div className="w-12 h-12 rounded-xl bg-green-primary/10 flex items-center justify-center mx-auto mb-6">
-            <Zap size={24} className="text-green-primary" />
+    <section className={section}>
+      <Reveal className={container}>
+        <div className="rounded-2xl bg-accent text-bg-primary p-6 sm:p-8 lg:p-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="max-w-2xl">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3">Ready to start building?</h2>
+            <p className="text-base sm:text-lg text-bg-primary/80 font-medium">
+              Join Code2Chill and become part of a community that codes, creates
+              and collaborates. No experience required — just curiosity.
+            </p>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4">
-            Ready to start building?
-          </h2>
-          <p className="text-text-secondary text-base mb-8 max-w-lg mx-auto">
-            Join Code2Chill and become part of a community that codes, creates
-            and collaborates. No experience required — just curiosity.
-          </p>
           <Link
             to="/join"
-            className="group inline-flex items-center gap-2 px-7 py-3 rounded-lg bg-green-primary text-bg-primary font-semibold text-sm
-                       hover:bg-green-secondary transition-all duration-200 glow-green-sm"
+            className="group shrink-0 self-start lg:self-auto inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-bg-primary text-accent font-display font-bold text-base transition-colors duration-150 hover:bg-bg-secondary"
           >
             Join Us Today
-            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
@@ -279,9 +290,9 @@ function Home() {
   return (
     <>
       <Hero />
+      <Stats />
       <About />
       <WhatWeDo />
-      <TechStack />
       <CallToAction />
     </>
   );

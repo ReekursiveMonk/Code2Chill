@@ -14,14 +14,14 @@ const CATEGORIES = ['All', 'Web', 'Mobile', 'AI/ML', 'CLI Tool'];
 
 function ProjectCard({ project }) {
   return (
-    <div className="group flex flex-col p-5 rounded-xl bg-bg-card border border-border hover:border-green-primary/20 transition-all duration-300">
+    <div className="group flex h-full flex-col p-5 rounded-xl bg-bg-card border border-border hover:border-accent/50 transition-colors duration-200">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div>
-          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono font-medium text-green-primary bg-green-primary/10 border border-green-primary/20 mb-2">
+          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono font-medium text-accent bg-accent/10 border border-accent/20 mb-2">
             {project.category}
           </span>
-          <h3 className="text-lg font-semibold text-text-primary group-hover:text-green-primary transition-colors">
+          <h3 className="text-lg font-semibold text-text-primary group-hover:text-accent transition-colors">
             {project.title}
           </h3>
         </div>
@@ -63,7 +63,7 @@ function ProjectCard({ project }) {
               href={project.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 rounded-md text-text-muted hover:text-green-primary hover:bg-green-primary/10 transition-all"
+              className="p-1.5 rounded-md text-text-muted hover:text-accent hover:bg-accent/10 transition-all"
               aria-label="View on GitHub"
             >
               <GithubIcon size={16} />
@@ -74,7 +74,7 @@ function ProjectCard({ project }) {
               href={project.live}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 rounded-md text-text-muted hover:text-green-primary hover:bg-green-primary/10 transition-all"
+              className="p-1.5 rounded-md text-text-muted hover:text-accent hover:bg-accent/10 transition-all"
               aria-label="View live demo"
             >
               <ExternalLink size={16} />
@@ -94,9 +94,9 @@ function Projects() {
   );
 
   return (
-    <div className="pt-24 pb-20">
+    <div className="pt-24 pb-14">
       {/* Header */}
-      <section className="px-4 sm:px-6 lg:px-8 mb-12">
+      <section className="px-4 sm:px-6 lg:px-8 mb-8">
         <div className="max-w-6xl mx-auto">
           <SectionHeading
             badge="Projects"
@@ -105,7 +105,7 @@ function Projects() {
           />
 
           {/* Category Filter */}
-          <div className="flex items-center gap-2 justify-center flex-wrap">
+          <div className="animate-enter enter-delay-1 flex items-center gap-2 justify-center flex-wrap">
             <Filter size={14} className="text-text-muted" />
             {CATEGORIES.map((cat) => (
               <button
@@ -113,7 +113,7 @@ function Projects() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                   selectedCategory === cat
-                    ? 'bg-green-primary/10 text-green-primary border border-green-primary/20'
+                    ? 'bg-accent/10 text-accent border border-accent/20'
                     : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
                 }`}
               >
@@ -128,13 +128,13 @@ function Projects() {
       <section className="px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           {filteredProjects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="animate-stagger grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredProjects.map((project) => (
                 <ProjectCard key={project.id} project={project} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
+            <div className="animate-enter text-center py-12">
               <Code2 size={40} className="text-text-muted mx-auto mb-4" />
               <p className="text-text-secondary text-sm">
                 No projects found for this category.
@@ -145,9 +145,9 @@ function Projects() {
       </section>
 
       {/* Contribute CTA */}
-      <section className="px-4 sm:px-6 lg:px-8 mt-16">
+      <section className="px-4 sm:px-6 lg:px-8 mt-12">
         <div className="max-w-3xl mx-auto">
-          <div className="p-6 sm:p-8 rounded-xl bg-bg-card border border-border text-center">
+          <div className="animate-enter enter-delay-3 p-5 sm:p-6 rounded-xl bg-bg-card border border-border text-center">
             <h3 className="text-xl font-semibold text-text-primary mb-2">
               Have a project idea?
             </h3>
@@ -159,8 +159,8 @@ function Projects() {
               href="https://github.com/CodeWithPrinceX/Code2Chill/issues"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-green-primary text-bg-primary font-semibold text-sm
-                         hover:bg-green-secondary transition-all duration-200"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-bg-primary font-semibold text-sm
+                         hover:bg-accent-2 transition-all duration-200"
             >
               <GithubIcon size={16} />
               Propose on GitHub

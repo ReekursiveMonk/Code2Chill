@@ -15,7 +15,7 @@ function FormField({ id, label, error, type = 'text', hint, ...inputProps }) {
   return (
     <div>
       <label htmlFor={id} className="block text-xs font-mono text-text-secondary mb-2">
-        {label} <span className="text-green-primary">*</span>
+        {label} <span className="text-accent">*</span>
       </label>
       <div className="relative">
         <input
@@ -26,7 +26,7 @@ function FormField({ id, label, error, type = 'text', hint, ...inputProps }) {
           className={`w-full px-3.5 py-2.5 ${isPassword ? 'pr-11' : ''} rounded-lg bg-bg-primary border text-text-primary text-sm focus:outline-none transition-colors placeholder:text-text-muted ${
             error
               ? 'border-red-400/60 focus:border-red-400'
-              : 'border-border focus:border-green-primary/60'
+              : 'border-border focus:border-accent/60'
           }`}
           {...inputProps}
         />

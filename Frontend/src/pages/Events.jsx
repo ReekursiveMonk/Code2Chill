@@ -29,16 +29,16 @@ function EventCard({ event }) {
   const isUpcoming = event.status === 'upcoming';
 
   return (
-    <div className="group p-5 rounded-xl bg-bg-card border border-border hover:border-green-primary/20 transition-all duration-300">
+    <div className="group h-full p-5 rounded-xl bg-bg-card border border-border hover:border-accent/50 transition-colors duration-200">
       {/* Top row: category + status */}
       <div className="flex items-center justify-between mb-4">
-        <span className="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-green-primary/10 text-green-primary border border-green-primary/20">
+        <span className="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-accent/10 text-accent border border-accent/20">
           {event.category}
         </span>
         <span
           className={`px-2.5 py-1 rounded-md text-xs font-medium ${
             isUpcoming
-              ? 'bg-green-primary/10 text-green-primary'
+              ? 'bg-accent-2/10 text-accent-2'
               : 'bg-white/5 text-text-muted'
           }`}
         >
@@ -47,7 +47,7 @@ function EventCard({ event }) {
       </div>
 
       {/* Title */}
-      <h3 className="text-lg font-semibold text-text-primary mb-2 group-hover:text-green-primary transition-colors">
+      <h3 className="text-lg font-semibold text-text-primary mb-2 group-hover:text-accent transition-colors">
         {event.title}
       </h3>
 
@@ -59,19 +59,19 @@ function EventCard({ event }) {
       {/* Meta */}
       <div className="space-y-2 text-xs text-text-muted">
         <div className="flex items-center gap-2">
-          <Calendar size={14} className="text-green-primary/70" />
+          <Calendar size={14} className="text-accent/70" />
           <span>{event.date}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Clock size={14} className="text-green-primary/70" />
+          <Clock size={14} className="text-accent/70" />
           <span>{event.time}</span>
         </div>
         <div className="flex items-center gap-2">
-          <MapPin size={14} className="text-green-primary/70" />
+          <MapPin size={14} className="text-accent/70" />
           <span>{event.location}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Users size={14} className="text-green-primary/70" />
+          <Users size={14} className="text-accent/70" />
           <span>{event.attendees} {isUpcoming ? 'expected' : 'attended'}</span>
         </div>
       </div>
@@ -98,9 +98,9 @@ function Events() {
   });
 
   return (
-    <div className="pt-24 pb-20">
+    <div className="pt-24 pb-14">
       {/* Header */}
-      <section className="px-4 sm:px-6 lg:px-8 mb-12">
+      <section className="px-4 sm:px-6 lg:px-8 mb-8">
         <div className="max-w-6xl mx-auto">
           <SectionHeading
             badge="Events"
@@ -109,7 +109,7 @@ function Events() {
           />
 
           {/* Filters */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-center">
+          <div className="animate-enter enter-delay-1 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-center">
             {/* Category Filter */}
             <div className="flex items-center gap-2 flex-wrap">
               <Filter size={14} className="text-text-muted" />
@@ -119,7 +119,7 @@ function Events() {
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                     selectedCategory === cat
-                      ? 'bg-green-primary/10 text-green-primary border border-green-primary/20'
+                      ? 'bg-accent/10 text-accent border border-accent/20'
                       : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
                   }`}
                 >
@@ -136,7 +136,7 @@ function Events() {
                   onClick={() => setSelectedStatus(status)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                     selectedStatus === status
-                      ? 'bg-green-primary/10 text-green-primary border border-green-primary/20'
+                      ? 'bg-accent/10 text-accent border border-accent/20'
                       : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
                   }`}
                 >
@@ -152,13 +152,13 @@ function Events() {
       <section className="px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           {filteredEvents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="animate-stagger grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredEvents.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
+            <div className="animate-enter text-center py-12">
               <Calendar size={40} className="text-text-muted mx-auto mb-4" />
               <p className="text-text-secondary text-sm">
                 No events found for the selected filters.

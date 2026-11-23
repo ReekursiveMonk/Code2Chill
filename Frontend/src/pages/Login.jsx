@@ -60,7 +60,7 @@ function Login() {
       footer={
         <>
           New here?{' '}
-          <Link to="/signup" className="text-green-primary font-medium hover:underline">
+          <Link to="/signup" className="text-accent font-medium hover:underline">
             Create an account
           </Link>
         </>
@@ -93,7 +93,7 @@ function Login() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full group flex items-center justify-center gap-2 py-3 rounded-lg bg-green-primary text-bg-primary font-semibold text-sm hover:bg-green-secondary transition-all duration-200 glow-green-sm disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full group flex items-center justify-center gap-2 py-3 rounded-lg bg-accent text-bg-primary font-semibold text-sm hover:bg-accent-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {submitting ? 'Logging in…' : 'Log In'}
           <LogIn size={16} className="group-hover:translate-x-1 transition-transform" />

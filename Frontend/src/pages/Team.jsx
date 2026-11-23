@@ -22,10 +22,10 @@ function MemberCard({ member, isLead = false }) {
 
   return (
     <div
-      className={`group p-5 rounded-xl bg-bg-card border transition-all duration-300 ${
+      className={`group h-full p-5 rounded-xl bg-bg-card border transition-colors duration-200 ${
         isLead
-          ? 'border-green-primary/30 hover:border-green-primary/50'
-          : 'border-border hover:border-green-primary/20'
+          ? 'border-accent/30 hover:border-accent/60'
+          : 'border-border hover:border-accent/50'
       }`}
     >
       {/* Avatar */}
@@ -33,7 +33,7 @@ function MemberCard({ member, isLead = false }) {
         <div
           className={`w-12 h-12 rounded-xl flex items-center justify-center font-mono font-bold text-sm ${
             isLead
-              ? 'bg-green-primary/15 text-green-primary'
+              ? 'bg-accent/15 text-accent'
               : 'bg-bg-primary text-text-muted border border-border'
           }`}
         >
@@ -48,10 +48,10 @@ function MemberCard({ member, isLead = false }) {
           )}
         </div>
         <div>
-          <h3 className="text-base font-semibold text-text-primary group-hover:text-green-primary transition-colors">
+          <h3 className="text-base font-semibold text-text-primary group-hover:text-accent transition-colors">
             {member.name}
           </h3>
-          <p className="mt-0.5 text-xs font-mono text-green-primary [text-shadow:0_0_8px_rgba(88,245,132,0.35)]">
+          <p className="mt-0.5 text-xs font-mono text-accent">
             {member.role}
           </p>
         </div>
@@ -74,7 +74,7 @@ function MemberCard({ member, isLead = false }) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={social.label}
-              className="p-2 rounded-lg text-text-muted hover:text-green-primary hover:bg-green-primary/10 transition-all duration-200"
+              className="p-2 rounded-lg text-text-muted hover:text-accent hover:bg-accent/10 transition-all duration-200"
             >
               <social.icon size={15} />
             </a>
@@ -87,9 +87,9 @@ function MemberCard({ member, isLead = false }) {
 
 function Team() {
   return (
-    <div className="pt-24 pb-20">
+    <div className="pt-24 pb-14">
       {/* Header */}
-      <section className="px-4 sm:px-6 lg:px-8 mb-12">
+      <section className="px-4 sm:px-6 lg:px-8 mb-8">
         <div className="max-w-6xl mx-auto">
           <SectionHeading
             badge="Our Team"
@@ -100,12 +100,12 @@ function Team() {
       </section>
 
       {/* Lead Section */}
-      <section className="px-4 sm:px-6 lg:px-8 mb-10">
+      <section className="px-4 sm:px-6 lg:px-8 mb-8">
         <div className="max-w-6xl mx-auto">
-          <h3 className="text-sm font-mono font-medium text-green-primary/70 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <h3 className="animate-enter enter-delay-1 text-sm font-mono font-medium text-accent/70 uppercase tracking-wider mb-4 flex items-center gap-2">
             <Code2 size={14} /> Leadership
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="animate-stagger grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {TEAM_DATA.leads.map((member) => (
               <MemberCard key={member.name} member={member} isLead />
             ))}
@@ -116,10 +116,10 @@ function Team() {
       {/* Core Team Section */}
       <section className="px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <h3 className="text-sm font-mono font-medium text-text-muted uppercase tracking-wider mb-4 flex items-center gap-2">
+          <h3 className="animate-enter enter-delay-2 text-sm font-mono font-medium text-text-muted uppercase tracking-wider mb-4 flex items-center gap-2">
             <Code2 size={14} /> Core Team
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="animate-stagger [--stagger-start:240ms] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {TEAM_DATA.core.map((member) => (
               <MemberCard key={member.name} member={member} />
             ))}
@@ -128,9 +128,9 @@ function Team() {
       </section>
 
       {/* Join the Team CTA */}
-      <section className="px-4 sm:px-6 lg:px-8 mt-16">
+      <section className="px-4 sm:px-6 lg:px-8 mt-12">
         <div className="max-w-3xl mx-auto">
-          <div className="p-6 sm:p-8 rounded-xl bg-bg-card border border-border text-center">
+          <div className="animate-enter enter-delay-3 p-5 sm:p-6 rounded-xl bg-bg-card border border-border text-center">
             <h3 className="text-xl font-semibold text-text-primary mb-2">
               Want to join the core team?
             </h3>
@@ -140,8 +140,8 @@ function Team() {
             </p>
             <Link
               to="/join"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-green-primary text-bg-primary font-semibold text-sm
-                         hover:bg-green-secondary transition-all duration-200"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-bg-primary font-semibold text-sm
+                         hover:bg-accent-2 transition-all duration-200"
             >
               Apply to Join
             </Link>

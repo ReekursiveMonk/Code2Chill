@@ -56,10 +56,10 @@ function Navbar() {
     <nav className="fixed top-0 inset-x-0 z-50 px-3 sm:px-4 pt-3">
       {/* Floating glass bar. Only colours transition; the blur stays static. */}
       <div
-        className={`max-w-6xl mx-auto rounded-2xl border backdrop-blur-xl backdrop-saturate-150 transition-[background-color,border-color,box-shadow] duration-300 ${
+        className={`max-w-6xl mx-auto rounded-2xl border backdrop-blur-md transition-[background-color,border-color,box-shadow] duration-300 ${
           scrolled || isOpen
-            ? 'bg-bg-primary/80 border-green-primary/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_12px_32px_-12px_rgba(0,0,0,0.7)]'
-            : 'bg-bg-secondary/45 border-green-primary/15 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]'
+            ? 'bg-bg-secondary/85 border-border shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_12px_32px_-12px_rgba(0,0,0,0.8)]'
+            : 'bg-bg-secondary/55 border-white/[0.07] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]'
         }`}
       >
         <div className="flex items-center justify-between h-16 px-4 sm:px-5">
@@ -78,7 +78,7 @@ function Navbar() {
                     aria-current={isActive ? 'page' : undefined}
                     className={`relative px-3.5 py-2 rounded-lg text-sm transition-colors duration-200 ${
                       isActive
-                        ? 'text-green-primary font-semibold'
+                        ? 'text-accent font-semibold'
                         : 'font-medium text-text-secondary hover:text-text-primary hover:bg-white/5'
                     }`}
                   >
@@ -86,7 +86,7 @@ function Navbar() {
                     {/* Active indicator */}
                     <span
                       aria-hidden="true"
-                      className={`absolute left-3.5 right-3.5 -bottom-0.5 h-0.5 rounded-full bg-green-primary shadow-[0_0_10px_rgba(163,255,107,0.7)] origin-left transition-transform duration-300 ${
+                      className={`absolute left-3.5 right-3.5 -bottom-0.5 h-0.5 rounded-full bg-accent origin-left transition-transform duration-300 ${
                         isActive ? 'scale-x-100' : 'scale-x-0'
                       }`}
                     />
@@ -101,10 +101,10 @@ function Navbar() {
               <Link
                 to="/login"
                 aria-current={isAuthPage ? 'page' : undefined}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border-2 border-green-primary brutal-hover ${
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border-2 border-accent brutal-hover ${
                   isAuthPage
-                    ? 'bg-green-primary text-bg-primary brutal-shadow-light'
-                    : 'bg-bg-primary text-green-primary'
+                    ? 'bg-accent text-bg-primary brutal-shadow-light'
+                    : 'bg-bg-primary text-accent'
                 }`}
               >
                 <LogIn size={15} aria-hidden="true" />
@@ -119,7 +119,7 @@ function Navbar() {
               <Link
                 to="/profile"
                 aria-label="Your profile"
-                className="w-9 h-9 rounded-full bg-green-primary/10 border border-green-primary/30 flex items-center justify-center text-green-primary font-mono text-xs font-bold hover:border-green-primary transition-colors"
+                className="w-9 h-9 rounded-full bg-accent/10 border border-accent/30 flex items-center justify-center text-accent font-mono text-xs font-bold hover:border-accent transition-colors"
               >
                 {getUserInitials(user)}
               </Link>
@@ -129,7 +129,7 @@ function Navbar() {
               onClick={() => setIsOpen(!isOpen)}
               className={`p-2 rounded-lg border transition-colors ${
                 isOpen
-                  ? 'border-green-primary/50 text-green-primary bg-green-primary/10'
+                  ? 'border-accent/50 text-accent bg-accent/10'
                   : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-white/5'
               }`}
               aria-label="Toggle menu"
@@ -148,7 +148,7 @@ function Navbar() {
             isOpen ? 'max-h-[36rem] opacity-100' : 'max-h-0 opacity-0'
           }`}
         >
-          <div className="border-t border-green-primary/15 px-3 pt-2 pb-3">
+          <div className="border-t border-border px-3 pt-2 pb-3">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
               return (
@@ -159,7 +159,7 @@ function Navbar() {
                   tabIndex={isOpen ? undefined : -1}
                   className={`block px-4 py-3 rounded-lg border-l-2 text-sm font-medium transition-colors duration-200 ${
                     isActive
-                      ? 'border-green-primary text-green-primary bg-green-primary/10'
+                      ? 'border-accent text-accent bg-accent/10'
                       : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-white/5'
                   }`}
                 >
@@ -169,7 +169,7 @@ function Navbar() {
             })}
 
             {/* Account */}
-            <div className="mt-2 pt-2 border-t border-green-primary/15">
+            <div className="mt-2 pt-2 border-t border-border">
               {user ? (
                 <>
                   <div className="px-4 py-2">
@@ -184,7 +184,7 @@ function Navbar() {
                     tabIndex={isOpen ? undefined : -1}
                     className={`flex items-center gap-2 px-4 py-3 rounded-lg border-l-2 text-sm font-medium transition-colors duration-200 ${
                       location.pathname === '/profile'
-                        ? 'border-green-primary text-green-primary bg-green-primary/10'
+                        ? 'border-accent text-accent bg-accent/10'
                         : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-white/5'
                     }`}
                   >
@@ -206,7 +206,7 @@ function Navbar() {
                   <Link
                     to="/login"
                     tabIndex={isOpen ? undefined : -1}
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-green-primary text-sm font-semibold text-green-primary bg-bg-primary brutal-hover"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-accent text-sm font-semibold text-accent bg-bg-primary brutal-hover"
                   >
                     <LogIn size={16} aria-hidden="true" />
                     Log in
@@ -214,7 +214,7 @@ function Navbar() {
                   <Link
                     to="/signup"
                     tabIndex={isOpen ? undefined : -1}
-                    className="flex items-center justify-center px-4 py-2.5 rounded-lg border-2 border-green-primary bg-green-primary text-bg-primary text-sm font-semibold brutal-hover brutal-shadow-light"
+                    className="flex items-center justify-center px-4 py-2.5 rounded-lg border-2 border-accent bg-accent text-bg-primary text-sm font-semibold brutal-hover brutal-shadow-light"
                   >
                     Sign up
                   </Link>

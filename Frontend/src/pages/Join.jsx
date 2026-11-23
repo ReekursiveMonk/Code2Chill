@@ -3,10 +3,13 @@ import {
   Send,
   CheckCircle2,
   Sparkles,
-  HelpCircle,
   Terminal,
 } from 'lucide-react';
 import SectionHeading from '../components/SectionHeading';
+
+// Shared style for every text input, select and textarea in the form.
+const INPUT_CLASS =
+  'w-full px-3.5 py-2.5 rounded-lg bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-accent/60 transition-colors placeholder:text-text-muted';
 
 const INTEREST_OPTIONS = [
   'Web Development',
@@ -86,9 +89,9 @@ function Join() {
   };
 
   return (
-    <div className="pt-24 pb-20">
+    <div className="pt-24 pb-14">
       {/* Header */}
-      <section className="px-4 sm:px-6 lg:px-8 mb-12">
+      <section className="px-4 sm:px-6 lg:px-8 mb-8">
         <div className="max-w-6xl mx-auto">
           <SectionHeading
             badge="Join Code2Chill"
@@ -100,27 +103,27 @@ function Join() {
 
       {/* Main Content: Form & Benefits */}
       <section className="px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
           {/* Left Column: Form (7 cols) */}
-          <div className="lg:col-span-7">
-            <div className="p-6 sm:p-8 rounded-2xl bg-bg-card border border-border">
+          <div className="lg:col-span-7 animate-enter enter-delay-1">
+            <div className="p-5 sm:p-6 rounded-xl bg-bg-card border border-border">
               {submitted ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 rounded-full bg-green-primary/15 border border-green-primary/30 flex items-center justify-center mx-auto mb-6 text-green-primary animate-fade-in">
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center mx-auto mb-5 text-accent animate-fade-in">
                     <CheckCircle2 size={36} />
                   </div>
                   <h3 className="text-2xl font-bold text-text-primary mb-3">
                     Application Recorded
                   </h3>
                   <p className="text-text-secondary text-sm max-w-md mx-auto mb-6 leading-relaxed">
-                    Thank you for your interest, <span className="text-green-primary font-medium">{formData.fullName}</span>!
+                    Thank you for your interest, <span className="text-accent font-medium">{formData.fullName}</span>!
                     Your application has been recorded on this page only and has not been sent to the team yet.
                     Online submissions will open soon. For application updates, please check the official Code2Chill website or contact the club's team directly.
                   </p>
                   <div className="inline-block px-4 py-2 rounded-lg bg-bg-primary border border-border text-xs font-mono text-text-muted">
-                    Status: <span className="text-green-primary">Saved on this page only</span>
+                    Status: <span className="text-accent">Saved on this page only</span>
                   </div>
-                  <div className="mt-8">
+                  <div className="mt-6">
                     <button
                       type="button"
                       onClick={() => {
@@ -136,15 +139,15 @@ function Join() {
                           reason: '',
                         });
                       }}
-                      className="px-5 py-2.5 rounded-lg border border-border text-text-secondary text-xs hover:text-text-primary hover:border-green-primary/30 transition-colors"
+                      className="px-5 py-2.5 rounded-lg border border-border text-text-secondary text-xs hover:text-text-primary hover:border-accent/30 transition-colors"
                     >
                       Submit Another Response
                     </button>
                   </div>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="pb-4 border-b border-border">
                     <h3 className="text-lg font-semibold text-text-primary mb-1">
                       Membership Application
                     </h3>
@@ -163,7 +166,7 @@ function Join() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="join-fullName" className="block text-xs font-mono text-text-secondary mb-2">
-                        Full Name <span className="text-green-primary">*</span>
+                        Full Name <span className="text-accent">*</span>
                       </label>
                       <input
                         type="text"
@@ -173,12 +176,12 @@ function Join() {
                         onChange={handleChange}
                         required
                         placeholder="Alex Rivera"
-                        className="w-full px-3.5 py-2.5 rounded-lg bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-green-primary/60 transition-colors placeholder:text-text-muted"
+                        className={INPUT_CLASS}
                       />
                     </div>
                     <div>
                       <label htmlFor="join-email" className="block text-xs font-mono text-text-secondary mb-2">
-                        Email Address <span className="text-green-primary">*</span>
+                        Email Address <span className="text-accent">*</span>
                       </label>
                       <input
                         type="email"
@@ -188,7 +191,7 @@ function Join() {
                         onChange={handleChange}
                         required
                         placeholder="exampleXXXX@chitkara.edu.in"
-                        className="w-full px-3.5 py-2.5 rounded-lg bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-green-primary/60 transition-colors placeholder:text-text-muted"
+                        className={INPUT_CLASS}
                       />
                     </div>
                   </div>
@@ -204,7 +207,7 @@ function Join() {
                         name="year"
                         value={formData.year}
                         onChange={handleChange}
-                        className="w-full px-3.5 py-2.5 rounded-lg bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-green-primary/60 transition-colors"
+                        className={INPUT_CLASS}
                       >
                         <option value="1st Year">1st Year (Freshman)</option>
                         <option value="2nd Year">2nd Year (Sophomore)</option>
@@ -215,7 +218,7 @@ function Join() {
                     </div>
                     <div>
                       <label htmlFor="join-branch" className="block text-xs font-mono text-text-secondary mb-2">
-                        Branch / Major <span className="text-green-primary">*</span>
+                        Branch / Major <span className="text-accent">*</span>
                       </label>
                       <input
                         type="text"
@@ -225,7 +228,7 @@ function Join() {
                         onChange={handleChange}
                         required
                         placeholder="e.g. Computer Science & Eng."
-                        className="w-full px-3.5 py-2.5 rounded-lg bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-green-primary/60 transition-colors placeholder:text-text-muted"
+                        className={INPUT_CLASS}
                       />
                     </div>
                   </div>
@@ -246,8 +249,8 @@ function Join() {
                             aria-pressed={isSelected}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                               isSelected
-                                ? 'bg-green-primary/15 text-green-primary border border-green-primary/40'
-                                : 'bg-bg-primary text-text-secondary border border-border hover:border-green-primary/20'
+                                ? 'bg-accent/15 text-accent border border-accent/40'
+                                : 'bg-bg-primary text-text-secondary border border-border hover:border-accent/50'
                             }`}
                           >
                             {interest}
@@ -268,7 +271,7 @@ function Join() {
                         name="experience"
                         value={formData.experience}
                         onChange={handleChange}
-                        className="w-full px-3.5 py-2.5 rounded-lg bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-green-primary/60 transition-colors"
+                        className={INPUT_CLASS}
                       >
                         <option value="Beginner">Beginner (Learning syntax / 0-6 months)</option>
                         <option value="Intermediate">Intermediate (Built basic projects / 1-2 years)</option>
@@ -286,7 +289,7 @@ function Join() {
                         value={formData.github}
                         onChange={handleChange}
                         placeholder="https://github.com/username"
-                        className="w-full px-3.5 py-2.5 rounded-lg bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-green-primary/60 transition-colors placeholder:text-text-muted"
+                        className={INPUT_CLASS}
                       />
                     </div>
                   </div>
@@ -303,14 +306,14 @@ function Join() {
                       onChange={handleChange}
                       rows={3}
                       placeholder="Tell us what you hope to build, learn or contribute..."
-                      className="w-full px-3.5 py-2.5 rounded-lg bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-green-primary/60 transition-colors placeholder:text-text-muted resize-none"
+                      className={`${INPUT_CLASS} resize-none`}
                     />
                   </div>
 
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full group flex items-center justify-center gap-2 py-3 rounded-lg bg-green-primary text-bg-primary font-semibold text-sm hover:bg-green-secondary transition-all duration-200 glow-green-sm"
+                    className="w-full group flex items-center justify-center gap-2 py-3 rounded-lg bg-accent text-bg-primary font-semibold text-sm hover:bg-accent-2 transition-all duration-200"
                   >
                     Submit Application
                     <Send size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -325,14 +328,14 @@ function Join() {
           </div>
 
           {/* Right Column: Benefits & Community Values (5 cols) */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-5 space-y-4 animate-stagger [--stagger-start:180ms]">
             {/* Why Join Card */}
-            <div className="p-6 rounded-2xl bg-bg-card border border-border">
-              <h3 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <Sparkles size={18} className="text-green-primary" />
+            <div className="p-5 rounded-xl bg-bg-card border border-border">
+              <h3 className="text-base font-semibold text-text-primary mb-3 flex items-center gap-2">
+                <Sparkles size={18} className="text-accent" />
                 Why Join Code2Chill?
               </h3>
-              <ul className="space-y-3.5 text-sm">
+              <ul className="space-y-3 text-sm">
                 {[
                   {
                     title: 'Real-World Team Projects',
@@ -352,7 +355,7 @@ function Join() {
                   },
                 ].map((benefit) => (
                   <li key={benefit.title} className="flex items-start gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-primary mt-2 flex-shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
                     <div>
                       <p className="font-medium text-text-primary text-xs">{benefit.title}</p>
                       <p className="text-text-secondary text-xs leading-relaxed">{benefit.desc}</p>
@@ -363,12 +366,12 @@ function Join() {
             </div>
 
             {/* Club Values Card */}
-            <div className="p-6 rounded-2xl bg-bg-card border border-border">
-              <h3 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <Terminal size={18} className="text-green-primary" />
+            <div className="p-5 rounded-xl bg-bg-card border border-border">
+              <h3 className="text-base font-semibold text-text-primary mb-3 flex items-center gap-2">
+                <Terminal size={18} className="text-accent" />
                 Our Code of Conduct
               </h3>
-              <div className="space-y-3 text-xs text-text-secondary leading-relaxed">
+              <div className="space-y-2.5 text-xs text-text-secondary leading-relaxed">
                 <p>
                   <strong className="text-text-primary font-mono">&gt; Curiosity first:</strong> No question is too basic. We all started at line 1.
                 </p>
@@ -382,9 +385,9 @@ function Join() {
             </div>
 
             {/* Contact quick card */}
-            <div className="p-6 rounded-2xl bg-bg-primary border border-border text-center">
-              <p className="text-xs text-text-muted mb-2 font-mono">Questions before applying?</p>
-              <p className="text-sm text-text-secondary mb-3">
+            <div className="p-5 rounded-xl bg-bg-card border border-border">
+              <p className="text-xs text-text-muted mb-1 font-mono">Questions before applying?</p>
+              <p className="text-sm text-text-secondary">
                 Reach out to the Code2Chill team through the club's official channels.
               </p>
             </div>
@@ -393,23 +396,20 @@ function Join() {
       </section>
 
       {/* FAQs Section */}
-      <section className="px-4 sm:px-6 lg:px-8 mt-20">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
-            <h3 className="text-2xl font-bold text-text-primary mb-2 flex items-center justify-center gap-2">
-              <HelpCircle size={22} className="text-green-primary" />
-              Frequently Asked Questions
-            </h3>
-            <p className="text-text-secondary text-sm">
-              Common questions from aspiring members.
-            </p>
-          </div>
+      <section className="px-4 sm:px-6 lg:px-8 mt-12">
+        <div className="max-w-6xl mx-auto">
+          <SectionHeading
+            align="left"
+            badge="FAQ"
+            title="Frequently Asked Questions"
+            description="Common questions from aspiring members."
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="animate-stagger grid grid-cols-1 md:grid-cols-2 gap-4">
             {FAQS.map((faq, index) => (
               <div
                 key={index}
-                className="p-5 rounded-xl bg-bg-card border border-border hover:border-green-primary/20 transition-all duration-200"
+                className="h-full p-5 rounded-xl bg-bg-card border border-border hover:border-accent/50 transition-colors duration-200"
               >
                 <h4 className="text-sm font-semibold text-text-primary mb-2">
                   {faq.q}
