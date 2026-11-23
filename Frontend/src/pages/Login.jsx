@@ -16,7 +16,7 @@ function Login() {
   const { user, isLoading, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = location.state?.from?.pathname || '/profile';
+  const redirectTo = location.state?.from?.pathname || '/';
 
   const [values, setValues] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
@@ -28,7 +28,7 @@ function Login() {
   }
 
   if (user && !submitting) {
-    return <Navigate to="/profile" replace />;
+    return <Navigate to="/" replace />;
   }
 
   const handleChange = (e) => {

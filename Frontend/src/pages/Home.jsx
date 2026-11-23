@@ -15,6 +15,9 @@ import {
 import SectionHeading from '../components/SectionHeading';
 import Reveal from '../components/Reveal';
 import HeroCanvas from '../components/HeroCanvas';
+import MemberHome from '../components/MemberHome';
+import { PageLoading } from '../components/DataState';
+import { useAuth } from '../context/AuthContext';
 import { OTHER_STATS } from '../data/stats';
 import { useApiData } from '../hooks/useApiData';
 import { getTeam } from '../services/api';
@@ -293,6 +296,18 @@ function CallToAction() {
 
 /* ───────── Home Page ───────── */
 function Home() {
+  const { user, isLoading } = useAuth();
+
+  // While a stored token is being checked, show neither version, so a
+  // signed-in visitor never sees the guest page flash on refresh.
+  if (isLoading) {
+    return <PageLoading label="Loading…" />;
+  }
+
+  if (user) {
+    return <MemberHome user={user} />;
+  }
+
   return (
     <>
       <Hero />

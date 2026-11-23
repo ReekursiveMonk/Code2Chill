@@ -36,7 +36,7 @@ function Signup() {
   }
 
   if (user && !submitting) {
-    return <Navigate to="/profile" replace />;
+    return <Navigate to="/" replace />;
   }
 
   const handleChange = (e) => {
@@ -70,7 +70,7 @@ function Signup() {
     setFormError('');
     try {
       await signup({ name: values.name, email: values.email, password: values.password });
-      navigate('/profile', { replace: true });
+      navigate('/', { replace: true });
     } catch (error) {
       setSubmitting(false);
       if (error.errors) {

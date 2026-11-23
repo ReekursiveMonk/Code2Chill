@@ -11,7 +11,7 @@ const navLinks = [
   { name: 'Events', path: '/events' },
   { name: 'Projects', path: '/projects' },
   { name: 'Team', path: '/team' },
-  { name: 'Join Us', path: '/join' },
+  { name: 'Join Us', path: '/join', guestOnly: true },
 ];
 
 function Navbar() {
@@ -19,7 +19,13 @@ function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, isLoading, logout } = useAuth();
+
+  // Signed-in users don't see guest-only links (Join Us). While a stored
+  // session is still being checked, guest-only links and the login button
+  // are held back so they don't flash for someone who is signed in.
+  const showGuestItems = !user && !isLoading;
+  const visibleLinks = navLinks.filter((link) => !link.guestOnly || showGuestItems);
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
 
@@ -69,7 +75,7 @@ function Navbar() {
           {/* Desktop Navigation + account */}
           <div className="hidden md:flex items-center gap-4">
             <div className="flex items-center gap-1">
-              {navLinks.map((link) => {
+              {visibleLinks.map((link) => {
                 const isActive = location.pathname === link.path;
                 return (
                   <Link
@@ -97,6 +103,8 @@ function Navbar() {
 
             {user ? (
               <ProfileMenu user={user} onLogout={handleLogout} />
+            ) : isLoading ? (
+              <span className="w-[42px] h-[42px]" aria-hidden="true" />
             ) : (
               <Link
                 to="/login"
@@ -149,7 +157,7 @@ function Navbar() {
           }`}
         >
           <div className="border-t border-border px-3 pt-2 pb-3">
-            {navLinks.map((link) => {
+            {visibleLinks.map((link) => {
               const isActive = location.pathname === link.path;
               return (
                 <Link
@@ -201,7 +209,7 @@ function Navbar() {
                     Log out
                   </button>
                 </>
-              ) : (
+              ) : isLoading ? null : (
                 <div className="grid grid-cols-2 gap-3 pt-2 pb-1 px-1">
                   <Link
                     to="/login"
