@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
 import healthRoutes from './routes/healthRoutes.js';
+import joinRoutes from './routes/joinRoutes.js';
+import contentRoutes from './routes/contentRoutes.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 
 /**
@@ -33,6 +35,8 @@ export function createApp(config) {
 
   app.use('/api/health', healthRoutes);
   app.use('/api/auth', authRoutes);
+  app.use('/api/join', joinRoutes);
+  app.use('/api', contentRoutes); // /api/events, /api/projects, /api/team
 
   app.use(notFound);
   app.use(errorHandler);

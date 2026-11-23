@@ -8,7 +8,9 @@ import {
 } from 'lucide-react';
 import SectionHeading from '../components/SectionHeading';
 import { GithubIcon } from '../components/BrandIcons';
-import { PROJECTS_DATA } from '../data/projects';
+import { LoadingState, ErrorState, EmptyState, SampleBadge } from '../components/DataState';
+import { useApiData } from '../hooks/useApiData';
+import { getProjects } from '../services/api';
 
 const CATEGORIES = ['All', 'Web', 'Mobile', 'AI/ML', 'CLI Tool'];
 
@@ -18,9 +20,12 @@ function ProjectCard({ project }) {
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div>
-          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono font-medium text-accent bg-accent/10 border border-accent/20 mb-2">
-            {project.category}
-          </span>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono font-medium text-accent bg-accent/10 border border-accent/20">
+              {project.category}
+            </span>
+            {project.isSample && <SampleBadge />}
+          </div>
           <h3 className="text-lg font-semibold text-text-primary group-hover:text-accent transition-colors">
             {project.title}
           </h3>
@@ -48,12 +53,18 @@ function ProjectCard({ project }) {
       <div className="flex items-center justify-between pt-3 border-t border-border">
         {/* Stats */}
         <div className="flex items-center gap-4 text-xs text-text-muted">
-          <span className="flex items-center gap-1">
-            <Star size={12} /> {project.stars}
-          </span>
-          <span className="flex items-center gap-1">
-            <GitFork size={12} /> {project.forks}
-          </span>
+          {project.stars != null && (
+            <span className="flex items-center gap-1">
+              <Star size={12} aria-hidden="true" /> {project.stars}
+              <span className="sr-only">stars</span>
+            </span>
+          )}
+          {project.forks != null && (
+            <span className="flex items-center gap-1">
+              <GitFork size={12} aria-hidden="true" /> {project.forks}
+              <span className="sr-only">forks</span>
+            </span>
+          )}
         </div>
 
         {/* Links */}
@@ -89,7 +100,10 @@ function ProjectCard({ project }) {
 function Projects() {
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const filteredProjects = PROJECTS_DATA.filter(
+  const { data, loading, error, retry } = useApiData(getProjects);
+  const projects = data?.projects || [];
+
+  const filteredProjects = projects.filter(
     (p) => selectedCategory === 'All' || p.category === selectedCategory
   );
 
@@ -101,7 +115,7 @@ function Projects() {
           <SectionHeading
             badge="Projects"
             title="Student Projects"
-            description="Real projects built by Code2Chill members. From web apps and mobile tools to AI experiments and CLI utilities."
+            description="Projects built by Code2Chill members. From web apps and mobile tools to AI experiments and CLI utilities."
           />
 
           {/* Category Filter */}
@@ -127,7 +141,13 @@ function Projects() {
       {/* Projects Grid */}
       <section className="px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          {filteredProjects.length > 0 ? (
+          {loading ? (
+            <LoadingState label="Loading projects…" />
+          ) : error ? (
+            <ErrorState message={error.message} onRetry={retry} />
+          ) : projects.length === 0 ? (
+            <EmptyState icon={Code2} message="No projects have been added yet." />
+          ) : filteredProjects.length > 0 ? (
             <div className="animate-stagger grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredProjects.map((project) => (
                 <ProjectCard key={project.id} project={project} />

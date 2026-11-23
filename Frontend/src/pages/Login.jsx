@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 import AuthLayout from '../components/AuthLayout';
 import FormField from '../components/FormField';
+import { FormAlert, PageLoading } from '../components/DataState';
 import { useAuth } from '../context/AuthContext';
 import { validateEmail, hasErrors } from '../utils/validation';
 
@@ -12,7 +13,7 @@ const validate = (values) => ({
 });
 
 function Login() {
-  const { user, login } = useAuth();
+  const { user, isLoading, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = location.state?.from?.pathname || '/profile';
@@ -20,6 +21,11 @@ function Login() {
   const [values, setValues] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
+
+  if (isLoading) {
+    return <PageLoading label="Checking your session…" />;
+  }
 
   if (user && !submitting) {
     return <Navigate to="/profile" replace />;
@@ -46,10 +52,18 @@ function Login() {
     }
 
     setSubmitting(true);
-    // The password is used only for the check above and is never stored.
-    await login({ email: values.email });
-    setValues({ email: '', password: '' });
-    navigate(redirectTo, { replace: true });
+    setFormError('');
+    try {
+      await login({ email: values.email, password: values.password });
+      navigate(redirectTo, { replace: true });
+    } catch (error) {
+      setSubmitting(false);
+      if (error.errors) {
+        setErrors((prev) => ({ ...prev, ...error.errors }));
+      } else {
+        setFormError(error.message);
+      }
+    }
   };
 
   return (
@@ -67,6 +81,7 @@ function Login() {
       }
     >
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
+        <FormAlert message={formError} />
         <FormField
           id="login-email"
           name="email"

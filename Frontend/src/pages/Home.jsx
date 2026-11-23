@@ -15,7 +15,9 @@ import {
 import SectionHeading from '../components/SectionHeading';
 import Reveal from '../components/Reveal';
 import HeroCanvas from '../components/HeroCanvas';
-import { HOME_STATS } from '../data/stats';
+import { OTHER_STATS } from '../data/stats';
+import { useApiData } from '../hooks/useApiData';
+import { getTeam } from '../services/api';
 
 /* Shared styles */
 const container = 'max-w-6xl mx-auto';
@@ -119,14 +121,18 @@ function StatCard({ value, label, icon: Icon, highlight = false, sample = false 
 }
 
 function Stats() {
-  // Members is calculated from the team data in stats.js; the rest are kept as-is.
-  const members = HOME_STATS.find((stat) => stat.label.startsWith('Member'));
-  const others = HOME_STATS.filter((stat) => stat !== members);
+  // Members comes from the backend (real team size); the rest are from stats.js.
+  const team = useApiData(getTeam);
+  const memberCount = team.data?.count;
+  const members = {
+    value: team.loading ? '…' : memberCount != null ? String(memberCount) : '—',
+    label: memberCount === 1 ? 'Member' : 'Members',
+  };
 
   const items = [
-    members && { ...members, icon: Users, to: '/team', highlight: true },
-    ...others.map((stat) => ({ ...stat, ...(STAT_DETAILS[stat.label] || { icon: Zap }) })),
-  ].filter(Boolean);
+    { ...members, icon: Users, to: '/team', highlight: true },
+    ...OTHER_STATS.map((stat) => ({ ...stat, ...(STAT_DETAILS[stat.label] || { icon: Zap }) })),
+  ];
 
   return (
     <section className="pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8">

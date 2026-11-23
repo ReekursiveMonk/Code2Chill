@@ -1,8 +1,6 @@
-import PrototypeNotice from './PrototypeNotice';
-
 /**
  * Shared page shell for the login and signup pages: centred card with a
- * badge, title, subtitle and the prototype notice.
+ * badge, title and subtitle.
  */
 function AuthLayout({ badge, title, subtitle, children, footer }) {
   return (
@@ -20,7 +18,6 @@ function AuthLayout({ badge, title, subtitle, children, footer }) {
         </div>
 
         <div className="animate-enter enter-delay-1 p-5 sm:p-6 rounded-xl bg-bg-card border border-border space-y-5">
-          <PrototypeNotice />
           {children}
         </div>
 

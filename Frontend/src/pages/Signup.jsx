@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { UserPlus } from 'lucide-react';
 import AuthLayout from '../components/AuthLayout';
 import FormField from '../components/FormField';
+import { FormAlert, PageLoading } from '../components/DataState';
 import { useAuth } from '../context/AuthContext';
 import {
   validateName,
@@ -22,12 +23,17 @@ const validate = (values) => ({
 });
 
 function Signup() {
-  const { user, signup } = useAuth();
+  const { user, isLoading, signup } = useAuth();
   const navigate = useNavigate();
 
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
+
+  if (isLoading) {
+    return <PageLoading label="Checking your session…" />;
+  }
 
   if (user && !submitting) {
     return <Navigate to="/profile" replace />;
@@ -61,10 +67,18 @@ function Signup() {
     }
 
     setSubmitting(true);
-    // Only name and email are passed on. The password is never stored.
-    await signup({ name: values.name, email: values.email });
-    setValues(EMPTY);
-    navigate('/profile', { replace: true });
+    setFormError('');
+    try {
+      await signup({ name: values.name, email: values.email, password: values.password });
+      navigate('/profile', { replace: true });
+    } catch (error) {
+      setSubmitting(false);
+      if (error.errors) {
+        setErrors((prev) => ({ ...prev, ...error.errors }));
+      } else {
+        setFormError(error.message);
+      }
+    }
   };
 
   return (
@@ -82,6 +96,7 @@ function Signup() {
       }
     >
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
+        <FormAlert message={formError} />
         <FormField
           id="signup-name"
           name="name"

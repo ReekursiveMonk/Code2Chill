@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Code2 } from 'lucide-react';
+import { Code2, Users } from 'lucide-react';
 import SectionHeading from '../components/SectionHeading';
-import { TEAM_DATA } from '../data/team';
+import { LoadingState, ErrorState, EmptyState } from '../components/DataState';
+import { useApiData } from '../hooks/useApiData';
+import { getTeam } from '../services/api';
 import { GithubIcon, LinkedinIcon, XIcon } from '../components/BrandIcons';
 
 function getInitials(name) {
@@ -86,6 +88,8 @@ function MemberCard({ member, isLead = false }) {
 }
 
 function Team() {
+  const { data, loading, error, retry } = useApiData(getTeam);
+
   return (
     <div className="pt-24 pb-14">
       {/* Header */}
@@ -99,33 +103,47 @@ function Team() {
         </div>
       </section>
 
-      {/* Lead Section */}
-      <section className="px-4 sm:px-6 lg:px-8 mb-8">
-        <div className="max-w-6xl mx-auto">
-          <h3 className="animate-enter enter-delay-1 text-sm font-mono font-medium text-accent/70 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Code2 size={14} /> Leadership
-          </h3>
-          <div className="animate-stagger grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {TEAM_DATA.leads.map((member) => (
-              <MemberCard key={member.name} member={member} isLead />
-            ))}
-          </div>
-        </div>
-      </section>
+      {loading ? (
+        <LoadingState label="Loading team…" />
+      ) : error ? (
+        <ErrorState message={error.message} onRetry={retry} />
+      ) : !data?.count ? (
+        <EmptyState icon={Users} message="Team members will be listed here soon." />
+      ) : (
+        <>
+          {/* Lead Section */}
+          {data.leads.length > 0 && (
+            <section className="px-4 sm:px-6 lg:px-8 mb-8">
+              <div className="max-w-6xl mx-auto">
+                <h3 className="animate-enter enter-delay-1 text-sm font-mono font-medium text-accent/70 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Code2 size={14} /> Leadership
+                </h3>
+                <div className="animate-stagger grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {data.leads.map((member) => (
+                    <MemberCard key={member.id} member={member} isLead />
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
 
-      {/* Core Team Section */}
-      <section className="px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <h3 className="animate-enter enter-delay-2 text-sm font-mono font-medium text-text-muted uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Code2 size={14} /> Core Team
-          </h3>
-          <div className="animate-stagger [--stagger-start:240ms] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {TEAM_DATA.core.map((member) => (
-              <MemberCard key={member.name} member={member} />
-            ))}
-          </div>
-        </div>
-      </section>
+          {/* Core Team Section */}
+          {data.core.length > 0 && (
+            <section className="px-4 sm:px-6 lg:px-8">
+              <div className="max-w-6xl mx-auto">
+                <h3 className="animate-enter enter-delay-2 text-sm font-mono font-medium text-text-muted uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Code2 size={14} /> Core Team
+                </h3>
+                <div className="animate-stagger [--stagger-start:240ms] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {data.core.map((member) => (
+                    <MemberCard key={member.id} member={member} />
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
+        </>
+      )}
 
       {/* Join the Team CTA */}
       <section className="px-4 sm:px-6 lg:px-8 mt-12">

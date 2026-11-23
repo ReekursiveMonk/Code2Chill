@@ -6,6 +6,7 @@ import {
   Terminal,
 } from 'lucide-react';
 import SectionHeading from '../components/SectionHeading';
+import { submitJoinApplication } from '../services/api';
 
 // Shared style for every text input, select and textarea in the form.
 const INPUT_CLASS =
@@ -55,6 +56,7 @@ function Join() {
 
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleInterestToggle = (interest) => {
     setFormData((prev) => {
@@ -78,14 +80,23 @@ function Join() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.fullName.trim() || !formData.email.trim() || !formData.branch.trim()) {
       setError('Please fill in all required fields.');
       return;
     }
     setError('');
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      await submitJoinApplication(formData);
+      setSubmitted(true);
+    } catch (err) {
+      // Show the server's field messages if there are any, otherwise its message.
+      setError(err.errors ? Object.values(err.errors).join(' ') : err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -113,15 +124,14 @@ function Join() {
                     <CheckCircle2 size={36} />
                   </div>
                   <h3 className="text-2xl font-bold text-text-primary mb-3">
-                    Application Recorded
+                    Application Submitted
                   </h3>
                   <p className="text-text-secondary text-sm max-w-md mx-auto mb-6 leading-relaxed">
-                    Thank you for your interest, <span className="text-accent font-medium">{formData.fullName}</span>!
-                    Your application has been recorded on this page only and has not been sent to the team yet.
-                    Online submissions will open soon. For application updates, please check the official Code2Chill website or contact the club's team directly.
+                    Thank you, <span className="text-accent font-medium">{formData.fullName}</span>!
+                    Your application has been received and will be reviewed by the Code2Chill team.
                   </p>
                   <div className="inline-block px-4 py-2 rounded-lg bg-bg-primary border border-border text-xs font-mono text-text-muted">
-                    Status: <span className="text-accent">Saved on this page only</span>
+                    Status: <span className="text-accent">Pending review</span>
                   </div>
                   <div className="mt-6">
                     <button
@@ -157,7 +167,7 @@ function Join() {
                   </div>
 
                   {error && (
-                    <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
+                    <div role="alert" className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
                       {error}
                     </div>
                   )}
@@ -313,9 +323,10 @@ function Join() {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full group flex items-center justify-center gap-2 py-3 rounded-lg bg-accent text-bg-primary font-semibold text-sm hover:bg-accent-2 transition-all duration-200"
+                    disabled={submitting}
+                    className="w-full group flex items-center justify-center gap-2 py-3 rounded-lg bg-accent text-bg-primary font-semibold text-sm hover:bg-accent-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Submit Application
+                    {submitting ? 'Submitting…' : 'Submit Application'}
                     <Send size={16} className="group-hover:translate-x-1 transition-transform" />
                   </button>
 

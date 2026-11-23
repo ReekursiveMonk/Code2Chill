@@ -48,6 +48,6 @@ export function loadConfig(env = process.env) {
     mongodbUri: env.MONGODB_URI,
     jwtSecret: env.JWT_SECRET,
     jwtExpiresIn: env.JWT_EXPIRES_IN || '7d',
-    clientOrigins: readList(env.CLIENT_ORIGIN || 'http://localhost:5173'),
+    clientOrigins: readList(env.CLIENT_ORIGIN || 'http://localhost:5173,http://localhost:4173'),
   });
 }

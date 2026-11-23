@@ -1,13 +1,17 @@
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Mail, User } from 'lucide-react';
-import PrototypeNotice from '../components/PrototypeNotice';
+import { LogOut, Mail, User, ShieldCheck, CalendarDays } from 'lucide-react';
+import { PageLoading } from '../components/DataState';
 import { useAuth } from '../context/AuthContext';
 import { getUserInitials } from '../utils/initials';
 
 function Profile() {
-  const { user, logout } = useAuth();
+  const { user, isLoading, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  if (isLoading) {
+    return <PageLoading label="Loading your profile…" />;
+  }
 
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location }} />;
@@ -18,15 +22,15 @@ function Profile() {
     navigate('/', { replace: true });
   };
 
+  const memberSince = user.createdAt
+    ? new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+    : null;
+
   const details = [
-    {
-      icon: User,
-      label: 'Name',
-      value: user.name,
-      empty: 'Not provided. Log in doesn’t ask for a name yet.',
-      wrap: 'break-words',
-    },
+    { icon: User, label: 'Name', value: user.name, wrap: 'break-words' },
     { icon: Mail, label: 'Email', value: user.email, wrap: 'break-all' },
+    { icon: ShieldCheck, label: 'Role', value: user.role === 'admin' ? 'Admin' : 'Member', wrap: '' },
+    { icon: CalendarDays, label: 'Member since', value: memberSince, wrap: '' },
   ];
 
   return (
@@ -57,14 +61,12 @@ function Profile() {
                 <div className="min-w-0">
                   <dt className="text-xs font-mono text-text-muted mb-0.5">{item.label}</dt>
                   <dd className={`text-sm text-text-primary ${item.wrap}`}>
-                    {item.value || <span className="text-text-muted">{item.empty}</span>}
+                    {item.value || <span className="text-text-muted">Not available</span>}
                   </dd>
                 </div>
               </div>
             ))}
           </dl>
-
-          <PrototypeNotice />
 
           <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-border">
             <p className="text-xs text-text-muted">Session ends when you log out or close this tab.</p>

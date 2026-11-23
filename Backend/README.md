@@ -2,7 +2,7 @@
 
 REST API for the Code2Chill website: **Node.js, Express, MongoDB (Mongoose), JWT and bcrypt**.
 
-Phase 1 provides the server setup, the database connection and user authentication (signup, login, current user). The frontend is **not connected yet**. That's Phase 2.
+It provides user accounts (signup, login, current user), the Join Us application API with admin review, and read-only APIs for events, projects and the team. The React frontend in `../Frontend` uses all of them.
 
 ---
 
@@ -11,12 +11,12 @@ Phase 1 provides the server setup, the database connection and user authenticati
 - Node.js **20 or later** (`node -v`)
 - A MongoDB database: a free [MongoDB Atlas](https://www.mongodb.com/atlas) cluster or MongoDB installed locally
 
-## Setup
+## Setup (Windows PowerShell)
 
-```bash
+```powershell
 cd D:\Code2Chill\Backend
 npm install
-copy .env.example .env        # macOS/Linux: cp .env.example .env
+Copy-Item .env.example .env
 ```
 
 Then open `.env` and fill in:
@@ -33,6 +33,15 @@ Then open `.env` and fill in:
 | --- | --- |
 | `npm run dev` | Start with auto-restart on file changes (`node --watch`) |
 | `npm start` | Start normally (production) |
+| `npm run seed` | Load the team, projects and sample events into MongoDB (safe to re-run) |
+| `npm run seed -- --no-samples` | Load only the team and real projects |
+| `npm run seed -- --remove-samples` | Delete all records marked `isSample` |
+| `npm run make-admin -- <email>` | Give an existing account the admin role (`-- <email> member` to undo) |
+
+### First run
+
+1. `npm run seed` loads the real team, the projects and the sample events. Without it, the Events, Projects and Team pages are empty.
+2. Sign up on the website, then run `npm run make-admin -- your@email.com` to make yourself an admin. Admin rights can **only** be granted this way, never through the API.
 
 On success the console shows:
 
@@ -54,7 +63,7 @@ If `.env` is incomplete or MongoDB can't be reached, the server prints the reaso
 | `PORT` | No | `5000` | Port the API listens on |
 | `NODE_ENV` | No | `development` | `production` hides error stack traces |
 | `JWT_EXPIRES_IN` | No | `7d` | Token lifetime (`1h`, `7d`, …) |
-| `CLIENT_ORIGIN` | No | `http://localhost:5173` | Frontend origin(s) allowed by CORS, comma-separated (add your Vercel URL in production) |
+| `CLIENT_ORIGIN` | No | `http://localhost:5173,http://localhost:4173` | Frontend origin(s) allowed by CORS, comma-separated, no trailing slash (add your Vercel URL in production) |
 
 `.env` is git-ignored. Only `.env.example` (no secrets) is committed.
 
@@ -70,21 +79,36 @@ Backend/
 │   ├── env.js                # Loads .env and validates required variables
 │   └── db.js                 # MongoDB connect / disconnect / status helpers
 ├── models/
-│   └── User.js               # User schema, password hashing, safe public fields
+│   ├── User.js               # Accounts: password hashing, safe public fields
+│   ├── JoinApplication.js    # Join Us applications + allowed form options
+│   ├── Event.js              # Events (isSample marks placeholder content)
+│   ├── Project.js            # Projects (isSample marks placeholder content)
+│   └── TeamMember.js         # Team page members
 ├── controllers/
 │   ├── authController.js     # signup, login, me
+│   ├── joinController.js     # submit, list (admin), update status (admin)
+│   ├── contentController.js  # events, projects, team
 │   └── healthController.js   # health check
 ├── routes/
 │   ├── authRoutes.js         # /api/auth/*
+│   ├── joinRoutes.js         # /api/join*
+│   ├── contentRoutes.js      # /api/events*, /api/projects*, /api/team
 │   └── healthRoutes.js       # /api/health
 ├── middleware/
 │   ├── auth.js               # requireAuth: verifies the Bearer token
+│   ├── requireRole.js        # requireRole('admin'): 403 for other roles
 │   └── errorHandler.js       # 404 + central JSON error responses
 ├── utils/
 │   ├── ApiError.js           # Error with an HTTP status code
 │   ├── asyncHandler.js       # Forwards async errors to the error handler
 │   ├── token.js              # Sign / verify JWTs (HS256)
-│   └── validation.js         # Signup/login validation (same rules as the frontend)
+│   ├── validation.js         # Signup/login validation (same rules as the frontend)
+│   └── joinValidation.js     # Join form validation (same fields as the frontend)
+├── data/
+│   └── seedData.js           # Real team, projects, sample events (used by npm run seed)
+├── scripts/
+│   ├── seed.js               # npm run seed
+│   └── makeAdmin.js          # npm run make-admin
 ├── .env.example
 └── package.json
 ```
@@ -116,8 +140,9 @@ All request and response bodies are JSON.
 | 200 / 201 | Success / created |
 | 400 | Invalid input, or malformed JSON |
 | 401 | Not logged in, wrong credentials, or invalid/expired token |
-| 404 | Unknown route |
-| 409 | Email already registered |
+| 403 | Logged in, but not an admin |
+| 404 | Unknown route or record |
+| 409 | Email already registered, or an open application already exists |
 | 413 | Request body too large (limit 10 KB) |
 | 500 | Unexpected server error |
 | 503 | Health check: database not connected |
@@ -215,7 +240,110 @@ Authorization: Bearer <JWT>
 { "message": "This account no longer exists. Please log in again." }
 ```
 
-### Quick test with curl
+### Endpoint list
+
+| Method | Path | Access | Purpose |
+| --- | --- | --- | --- |
+| GET | `/api/health` | Public | API and database status |
+| POST | `/api/auth/signup` | Public | Create an account |
+| POST | `/api/auth/login` | Public | Log in |
+| GET | `/api/auth/me` | Logged in | Current user |
+| POST | `/api/join` | Public | Submit a Join Us application |
+| GET | `/api/join` | **Admin** | List applications (`?status=pending` etc.) |
+| PATCH | `/api/join/:id/status` | **Admin** | Change an application's status |
+| GET | `/api/events` | Public | All events, newest first |
+| GET | `/api/events/:id` | Public | One event |
+| GET | `/api/projects` | Public | All projects, real ones first |
+| GET | `/api/projects/:id` | Public | One project |
+| GET | `/api/team` | Public | Team grouped into leads and core, plus `count` |
+
+### `POST /api/join`
+
+Fields match the Join Us form. **Required:** `fullName`, `email`, `branch`.
+
+```json
+{
+  "fullName": "Jiya", "email": "a1234@chitkara.edu.in",
+  "year": "2nd Year", "branch": "CSE",
+  "interests": ["Web Development", "Open Source"],
+  "experience": "Beginner",
+  "github": "https://github.com/username",
+  "reason": "I want to build projects with others."
+}
+```
+
+- `year`: `1st Year` · `2nd Year` · `3rd Year` · `4th Year` · `Postgraduate` (default `1st Year`)
+- `experience`: `Beginner` · `Intermediate` · `Advanced` (default `Beginner`)
+- `interests`: any of `Web Development`, `Mobile Apps`, `AI & Machine Learning`, `Cloud & DevOps`, `Competitive Programming`, `Cybersecurity`, `UI/UX Design`, `Open Source`
+- `github`: optional, must start with `http://` or `https://`. `reason`: optional, max 1000 characters.
+
+```json
+// 201 Created
+{ "message": "Application submitted.", "application": { "id": "...", "status": "pending", "createdAt": "..." } }
+
+// 409 Conflict (this email already has a pending or reviewed application)
+{ "message": "An application with this email is already being reviewed.", "errors": { "email": "..." } }
+```
+
+### `GET /api/join` (admin) and `PATCH /api/join/:id/status` (admin)
+
+Both need `Authorization: Bearer <token>` from an **admin** account. Members get `403`.
+
+```json
+// GET /api/join?status=pending → 200
+{ "count": 1, "applications": [ { "id": "...", "fullName": "...", "email": "...", "year": "...", "branch": "...",
+  "interests": [], "experience": "...", "github": "", "reason": "", "status": "pending", "createdAt": "...", "updatedAt": "..." } ] }
+
+// PATCH /api/join/:id/status   body: { "status": "accepted" }   (pending | reviewed | accepted | rejected)
+{ "message": "Status updated.", "application": { ...same fields } }
+```
+
+### `GET /api/events`, `GET /api/events/:id`
+
+```json
+{ "count": 6, "events": [ { "id": "...", "title": "...", "description": "...", "date": "Dec 15, 2025", "time": "9:00 AM – 9:00 AM",
+  "location": "...", "category": "Hackathon", "startDate": "2025-12-15", "endDate": "2025-12-16", "attendees": 120, "isSample": true } ] }
+// /api/events/:id → { "event": { ... } }   invalid id → 400, unknown → 404
+```
+
+### `GET /api/projects`, `GET /api/projects/:id`
+
+```json
+{ "count": 6, "projects": [ { "id": "...", "title": "Code2Chill Website", "description": "...", "tech": ["React"], "category": "Web",
+  "github": "https://github.com/CodeWithPrinceX/Code2Chill", "live": null, "stars": null, "forks": null, "contributors": null, "isSample": false } ] }
+// /api/projects/:id → { "project": { ... } }
+```
+
+`stars`, `forks`, `contributors`, `github` and `live` are `null` when unknown. The frontend hides them.
+
+### `GET /api/team`
+
+```json
+{ "count": 4,
+  "leads": [ { "id": "...", "name": "Lakshay", "role": "President", "bio": null, "github": null, "linkedin": null, "twitter": null, "avatar": null },
+             { "id": "...", "name": "Jiya", "role": "Vice President", ... } ],
+  "core":  [ { "name": "Samanyu", "role": "Tech Head", ... },
+             { "name": "Prince Pratik", "role": "Member", "github": "https://github.com/ReekursiveMonk", ... } ] }
+```
+
+`count` is always the number of team members in the database.
+
+### Sample data
+
+Events and every project except **Code2Chill Website** are placeholder content copied from the original frontend. They're stored with `isSample: true`, shown with a "Sample" label on the website, and removed with `npm run seed -- --remove-samples`. To publish real content, add or edit records in MongoDB (e.g. with MongoDB Atlas or Compass) or update `data/seedData.js` and re-run the seed.
+
+### Quick test (PowerShell)
+
+```powershell
+Invoke-RestMethod http://localhost:5000/api/health
+Invoke-RestMethod http://localhost:5000/api/team
+
+$body = @{ name = 'Test User'; email = 'test@example.com'; password = 'password123' } | ConvertTo-Json
+$res  = Invoke-RestMethod -Method Post http://localhost:5000/api/auth/signup -ContentType 'application/json' -Body $body
+Invoke-RestMethod http://localhost:5000/api/auth/me -Headers @{ Authorization = "Bearer $($res.token)" }
+```
+
+### Quick test with curl (Windows `cmd`)
 
 ```bash
 curl http://localhost:5000/api/health
@@ -239,18 +367,15 @@ curl http://localhost:5000/api/auth/me -H "Authorization: Bearer <paste token he
 - Login returns the same error for unknown emails and wrong passwords, and takes similar time in both cases.
 - Inputs must be strings, which blocks NoSQL operator injection like `{ "$ne": null }`.
 - CORS allows only `CLIENT_ORIGIN`. JSON bodies are capped at 10 KB.
-- **Not yet included:** rate limiting on login and signup, email verification and password reset. Consider them before a public launch.
+- Only one open (pending/reviewed) Join application per email.
+- **Not yet included:** rate limiting on login/signup/join, email verification, password reset and an admin screen. Consider them before a public launch.
 
 ---
 
-## Frontend integration notes (Phase 2)
+## Frontend integration
 
-The frontend's prototype (`Frontend/src/context/AuthContext.jsx`) already calls `signup({ name, email, password })` and `login({ email, password })`, and its comments point to these exact endpoints. Phase 2 will:
+The frontend talks to this API through `Frontend/src/services/api.js`, using the `VITE_API_URL` environment variable (default `http://localhost:5000` in development).
 
-1. Add `VITE_API_URL` (e.g. `http://localhost:5000`) to the frontend.
-2. Replace the bodies of `signup` / `login` in `AuthContext.jsx` with `fetch` calls to `/api/auth/signup` and `/api/auth/login`, and store the returned `token`.
-3. On page load, call `GET /api/auth/me` with the stored token to restore the session, and clear it on 401.
-4. Show `errors.<field>` from 400/409 responses under the matching form fields, and `message` for 401.
-5. Remove the "Prototype only" notices once real accounts work.
-
-The login form doesn't ask for a name. `user.name` from the API now fills that in.
+- **Auth:** `Frontend/src/context/AuthContext.jsx` calls signup and login, stores only the JWT in `sessionStorage` (cleared when the tab closes), and restores the session with `GET /api/auth/me`. A rejected token is removed.
+- **Join Us** posts to `/api/join`. **Events, Projects, Team** and the Home member count load from the API, with loading, error and empty states.
+- There is no admin screen in the frontend yet. Admins use the `/api/join` endpoints directly (PowerShell, Postman or similar).

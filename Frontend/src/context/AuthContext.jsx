@@ -1,87 +1,96 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import * as api from '../services/api';
 
 /**
- * FRONTEND PROTOTYPE: there is no real authentication yet.
+ * Real authentication backed by the Code2Chill API.
  *
- * - No account is created and no password is checked. Login and signup simply
- *   start a "session" in this browser tab.
- * - Only the user's name and email are kept, in sessionStorage, so the profile
- *   survives a page refresh and is cleared when the tab is closed.
- * - Passwords never reach this file and are never stored anywhere.
- *
- * When the backend (Node.js, Express, MongoDB) is added, replace the bodies of
- * `signup`, `login` and `logout` with API calls. The rest of the app only uses
- * `useAuth()`, so pages and the navbar will not need to change.
+ * - Signup and login send credentials to the backend, which checks them,
+ *   hashes passwords and returns a signed token (JWT) plus the user.
+ * - Only the token is stored, in sessionStorage, so it is cleared when the
+ *   tab closes. Passwords and user details are never stored in the browser.
+ * - On page load the stored token is checked with GET /api/auth/me. If the
+ *   server rejects it (expired, invalid, account deleted), it is removed.
  */
 
-const STORAGE_KEY = 'code2chill:prototype-session';
+const TOKEN_KEY = 'code2chill:token';
 
 const AuthContext = createContext(null);
 
-function readStoredUser() {
+function readToken() {
   try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.email === 'string' && parsed.email) {
-      return {
-        name: typeof parsed.name === 'string' ? parsed.name : '',
-        email: parsed.email,
-      };
-    }
+    return window.sessionStorage.getItem(TOKEN_KEY);
   } catch {
-    // Storage unavailable (e.g. privacy mode) or corrupted: start signed out.
+    return null;
   }
-  return null;
 }
 
-function writeStoredUser(user) {
+function writeToken(token) {
   try {
-    if (user) {
-      // Store ONLY name and email. Never add passwords or tokens here.
-      window.sessionStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ name: user.name, email: user.email })
-      );
-    } else {
-      window.sessionStorage.removeItem(STORAGE_KEY);
-    }
+    if (token) window.sessionStorage.setItem(TOKEN_KEY, token);
+    else window.sessionStorage.removeItem(TOKEN_KEY);
   } catch {
-    // Ignore storage errors; the session still works until refresh.
+    // Storage unavailable (e.g. privacy mode): the session lasts until refresh.
   }
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(readStoredUser);
+  const [token, setToken] = useState(readToken);
+  const [user, setUser] = useState(null);
+  // True while a stored token is being checked on page load.
+  const [isLoading, setIsLoading] = useState(() => Boolean(readToken()));
 
-  const startSession = useCallback(({ name = '', email }) => {
-    const sessionUser = { name: name.trim(), email: email.trim() };
-    writeStoredUser(sessionUser);
-    setUser(sessionUser);
-    return sessionUser;
-  }, []);
-
-  // Backend later: POST /api/auth/signup with { name, email, password }.
-  const signup = useCallback(
-    async ({ name, email }) => startSession({ name, email }),
-    [startSession]
-  );
-
-  // Backend later: POST /api/auth/login with { email, password } and use the
-  // name returned by the server. The prototype has no way to look up a name.
-  const login = useCallback(
-    async ({ email }) => startSession({ email }),
-    [startSession]
-  );
-
-  const logout = useCallback(() => {
-    writeStoredUser(null);
+  const clearSession = useCallback(() => {
+    writeToken(null);
+    setToken(null);
     setUser(null);
   }, []);
 
+  // Restore the session once, when the app first loads.
+  useEffect(() => {
+    const storedToken = readToken();
+    if (!storedToken) {
+      setIsLoading(false);
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    api
+      .getMe(storedToken, { signal: controller.signal })
+      .then((data) => setUser(data.user))
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        // Only a rejected token logs the user out; a network problem keeps it
+        // so the session can be restored on the next visit.
+        if (error.status === 401) clearSession();
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [clearSession]);
+
+  const startSession = useCallback((data) => {
+    writeToken(data.token);
+    setToken(data.token);
+    setUser(data.user);
+    return data.user;
+  }, []);
+
+  // Both throw an ApiError on failure (message + optional field errors).
+  const signup = useCallback(
+    async ({ name, email, password }) => startSession(await api.signup({ name, email, password })),
+    [startSession]
+  );
+
+  const login = useCallback(
+    async ({ email, password }) => startSession(await api.login({ email, password })),
+    [startSession]
+  );
+
   const value = useMemo(
-    () => ({ user, isPrototype: true, signup, login, logout }),
-    [user, signup, login, logout]
+    () => ({ user, token, isLoading, signup, login, logout: clearSession }),
+    [user, token, isLoading, signup, login, clearSession]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

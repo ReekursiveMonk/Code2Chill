@@ -7,7 +7,9 @@ import {
   Filter,
 } from 'lucide-react';
 import SectionHeading from '../components/SectionHeading';
-import { EVENTS_DATA } from '../data/events';
+import { LoadingState, ErrorState, EmptyState, SampleBadge } from '../components/DataState';
+import { useApiData } from '../hooks/useApiData';
+import { getEvents } from '../services/api';
 
 const CATEGORIES = ['All', 'Hackathon', 'Workshop', 'Tech Talk', 'Meetup', 'Competition'];
 const STATUS_FILTERS = ['All', 'Upcoming', 'Past'];
@@ -32,9 +34,12 @@ function EventCard({ event }) {
     <div className="group h-full p-5 rounded-xl bg-bg-card border border-border hover:border-accent/50 transition-colors duration-200">
       {/* Top row: category + status */}
       <div className="flex items-center justify-between mb-4">
-        <span className="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-accent/10 text-accent border border-accent/20">
-          {event.category}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-accent/10 text-accent border border-accent/20">
+            {event.category}
+          </span>
+          {event.isSample && <SampleBadge />}
+        </div>
         <span
           className={`px-2.5 py-1 rounded-md text-xs font-medium ${
             isUpcoming
@@ -70,10 +75,12 @@ function EventCard({ event }) {
           <MapPin size={14} className="text-accent/70" />
           <span>{event.location}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Users size={14} className="text-accent/70" />
-          <span>{event.attendees} {isUpcoming ? 'expected' : 'attended'}</span>
-        </div>
+        {event.attendees != null && (
+          <div className="flex items-center gap-2">
+            <Users size={14} className="text-accent/70" />
+            <span>{event.attendees} {isUpcoming ? 'expected' : 'attended'}</span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -83,7 +90,9 @@ function Events() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
 
-  const eventsWithStatus = EVENTS_DATA.map((event) => ({
+  const { data, loading, error, retry } = useApiData(getEvents);
+
+  const eventsWithStatus = (data?.events || []).map((event) => ({
     ...event,
     status: getEventStatus(event),
   }));
@@ -151,18 +160,21 @@ function Events() {
       {/* Events Grid */}
       <section className="px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          {filteredEvents.length > 0 ? (
+          {loading ? (
+            <LoadingState label="Loading events…" />
+          ) : error ? (
+            <ErrorState message={error.message} onRetry={retry} />
+          ) : eventsWithStatus.length === 0 ? (
+            <EmptyState icon={Calendar} message="No events have been announced yet." />
+          ) : filteredEvents.length > 0 ? (
             <div className="animate-stagger grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredEvents.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
           ) : (
-            <div className="animate-enter text-center py-12">
-              <Calendar size={40} className="text-text-muted mx-auto mb-4" />
-              <p className="text-text-secondary text-sm">
-                No events found for the selected filters.
-              </p>
+            <div className="animate-enter">
+              <EmptyState icon={Calendar} message="No events found for the selected filters." />
             </div>
           )}
         </div>
