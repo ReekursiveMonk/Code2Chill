@@ -1,21 +1,135 @@
 @import "tailwindcss";
 
-/* ===== Custom Theme ===== */
+/* ===== Custom Theme =====
+   Token names are kept so every existing component picks up the new
+   palette. "green-primary" is now the lime primary accent. */
 @theme {
-  --color-bg-primary: #050505;
-  --color-bg-card: #111111;
-  --color-bg-card-hover: #191919;
-  --color-border: #242424;
-  --color-border-light: #2a2a2a;
-  --color-green-primary: #58F584;
-  --color-green-secondary: #35C96B;
-  --color-green-dark: #1a3a25;
-  --color-text-primary: #F5F5F5;
-  --color-text-secondary: #A3A3A3;
-  --color-text-muted: #6b6b6b;
+  --color-bg-primary: #080A08;
+  --color-bg-secondary: #101410;
+  --color-bg-card: #101410;
+  --color-bg-card-hover: #161C15;
+  --color-border: #232B22;
+  --color-border-light: #2E382D;
+  --color-green-primary: #A3FF6B;
+  --color-green-secondary: #58F584;
+  --color-green-dark: #1E3318;
+  --color-text-primary: #F5F5F0;
+  --color-text-secondary: #92998F;
+  --color-text-muted: #7A8277;
 
   --font-sans: 'Inter', 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* =====================================================================
+   Design system: glass surfaces + neo-brutalist accents
+   Defined with @utility so they live in Tailwind's utilities layer and
+   never override spacing or other utilities by accident.
+   ===================================================================== */
+
+/* Glass: translucent surface for floating layers (navbar menus, dropdowns,
+   overlays). Static blur only; never animate backdrop-filter. */
+@utility glass {
+  background-color: rgb(16 20 16 / 0.55);
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0) 45%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+@utility glass-strong {
+  background-color: rgb(10 13 10 / 0.88);
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0) 45%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+
+/* Atmospheric page background: layered radial light on a dark green-black
+   base. Static gradients only (no blur filters), so it's cheap to render. */
+@utility bg-atmosphere {
+  background-color: var(--color-bg-primary);
+  background-image:
+    radial-gradient(60% 45% at 50% -8%, rgb(163 255 107 / 0.11), transparent 70%),
+    radial-gradient(35% 40% at 0% 42%, rgb(88 245 132 / 0.06), transparent 70%),
+    radial-gradient(40% 45% at 100% 85%, rgb(163 255 107 / 0.05), transparent 70%),
+    linear-gradient(180deg, #080A08 0%, #0B0E0B 55%, #080A08 100%);
+}
+
+/* Faint technical grid that fades out towards the edges. */
+@utility bg-grid {
+  background-image:
+    linear-gradient(rgb(163 255 107 / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(163 255 107 / 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, #000 30%, transparent 80%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, #000 30%, transparent 80%);
+}
+
+/* Fine film grain from a tiny inline SVG. Rendered once; no animation. */
+@utility bg-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* Neo-brutalist offset shadows: hard edge, no blur. */
+@utility shadow-brutal {
+  box-shadow: 4px 4px 0 0 var(--color-green-primary);
+}
+
+@utility shadow-brutal-sm {
+  box-shadow: 3px 3px 0 0 var(--color-green-primary);
+}
+
+@utility shadow-brutal-muted {
+  box-shadow: 4px 4px 0 0 var(--color-border);
+}
+
+/* Lift-and-press interaction for bold buttons: moves up-left on hover to
+   reveal an offset shadow, and presses back down on click.
+   The shadow is green by default; on solid green buttons add
+   `brutal-shadow-light` so the offset stays visible. */
+@utility brutal-shadow-light {
+  --brutal-shadow-color: var(--color-text-primary);
+}
+
+@utility brutal-hover {
+  transition-property: transform, box-shadow, background-color, color, border-color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+
+  &:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 3px 3px 0 0 var(--brutal-shadow-color, var(--color-green-primary));
+  }
+
+  &:active {
+    transform: translate(0, 0);
+    box-shadow: 0 0 0 0 var(--brutal-shadow-color, var(--color-green-primary));
+  }
+}
+
+/* Typography and focus defaults. Utilities (e.g. font-mono on a heading,
+   focus:outline-none on inputs) still override these. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  h1,
+  h2 {
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-green-primary);
+    outline-offset: 2px;
+  }
 }
 
 /* ===== Base Styles ===== */
@@ -55,22 +169,22 @@ body {
 
 /* ===== Selection ===== */
 ::selection {
-  background-color: rgba(88, 245, 132, 0.2);
+  background-color: rgba(163, 255, 107, 0.2);
   color: var(--color-green-primary);
 }
 
 /* ===== Glow Utility ===== */
 .glow-green {
-  box-shadow: 0 0 20px rgba(88, 245, 132, 0.15),
-              0 0 60px rgba(88, 245, 132, 0.05);
+  box-shadow: 0 0 20px rgba(163, 255, 107, 0.15),
+              0 0 60px rgba(163, 255, 107, 0.05);
 }
 
 .glow-green-sm {
-  box-shadow: 0 0 10px rgba(88, 245, 132, 0.1);
+  box-shadow: 0 0 10px rgba(163, 255, 107, 0.1);
 }
 
 .text-glow-green {
-  text-shadow: 0 0 20px rgba(88, 245, 132, 0.3);
+  text-shadow: 0 0 20px rgba(163, 255, 107, 0.3);
 }
 
 /* ===== Animations ===== */
@@ -92,10 +206,10 @@ body {
 
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(88, 245, 132, 0.15);
+    box-shadow: 0 0 20px rgba(163, 255, 107, 0.15);
   }
   50% {
-    box-shadow: 0 0 30px rgba(88, 245, 132, 0.25);
+    box-shadow: 0 0 30px rgba(163, 255, 107, 0.25);
   }
 }
 
@@ -111,3 +225,21 @@ body {
 .animate-delay-200 { animation-delay: 0.2s; }
 .animate-delay-300 { animation-delay: 0.3s; }
 .animate-delay-400 { animation-delay: 0.4s; }
+
+/* ===== Reduced motion ===== */
+/* Content still appears (fill-mode keeps final state); it just doesn't move. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

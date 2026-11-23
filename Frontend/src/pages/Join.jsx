@@ -187,7 +187,7 @@ function Join() {
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        placeholder="alex@university.edu"
+                        placeholder="exampleXXXX@chitkara.edu.in"
                         className="w-full px-3.5 py-2.5 rounded-lg bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-green-primary/60 transition-colors placeholder:text-text-muted"
                       />
                     </div>

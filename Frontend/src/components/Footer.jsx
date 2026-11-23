@@ -16,7 +16,11 @@ function Footer() {
   const socialLinks = [
     { icon: GithubIcon, href: 'https://github.com/CodeWithPrinceX/Code2Chill', label: 'GitHub' },
     { icon: LinkedinIcon, href: '#', label: 'LinkedIn' },
-    { icon: InstagramIcon, href: '#', label: 'Instagram' },
+    {
+      icon: InstagramIcon,
+      href: 'https://www.instagram.com/code2chill.osl/',
+      label: 'Instagram (@code2chill.osl)',
+    },
   ].filter((s) => s.href !== '#');
 
   return (
@@ -72,7 +76,16 @@ function Footer() {
               ))}
             </div>
             <p className="text-text-muted text-xs mt-4">
-              Follow us for updates on events, projects and community news.
+              Follow us on Instagram at{' '}
+              <a
+                href="https://www.instagram.com/code2chill.osl/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-secondary hover:text-green-primary transition-colors duration-200"
+              >
+                @code2chill.osl
+              </a>{' '}
+              for updates on events, projects and community news.
             </p>
           </div>
         </div>

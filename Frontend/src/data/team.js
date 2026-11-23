@@ -1,79 +1,39 @@
 /**
- * SAMPLE DATA: replace with real club information before launch.
+ * Code2Chill team.
  *
- * Placeholder team members (names, roles, bios and links). Links set to '#'
- * or null are hidden on the page until a real profile URL is added.
- * The lead's GitHub URL is the project owner's real account; the name,
- * role and bio still need to be confirmed.
- * Do not publish these names as real club members.
+ * This is the single source of truth for team members. The Team page renders
+ * these groups, and the Home page member count is calculated from them, so
+ * adding or removing someone here updates both automatically.
+ *
+ * Optional fields (leave them out rather than adding placeholders):
+ *   bio     - short description, shown only when present
+ *   github, linkedin, twitter - full profile URLs, shown only when present
+ *   avatar  - image path; initials are shown when absent
  */
 
 export const TEAM_DATA = {
   leads: [
     {
-      name: 'Prince Kumar',
-      role: 'Founder & Lead',
-      bio: 'Full-stack developer and open-source enthusiast. Building Code2Chill to bring developers together.',
-      github: 'https://github.com/CodeWithPrinceX',
-      linkedin: '#',
-      twitter: '#',
-      avatar: null,
+      name: 'Lakshay',
+      role: 'President',
+    },
+    {
+      name: 'Jiya',
+      role: 'Vice President',
     },
   ],
   core: [
     {
-      name: 'Ananya Sharma',
-      role: 'Technical Lead',
-      bio: 'React and Node.js developer. Leads workshops and mentors new members on web development.',
-      github: '#',
-      linkedin: '#',
-      twitter: null,
-      avatar: null,
+      name: 'Samanyu',
+      role: 'Tech Head',
     },
     {
-      name: 'Rahul Verma',
-      role: 'Events Coordinator',
-      bio: 'Organises hackathons, meetups and all club events. Keeps the community calendar full.',
-      github: '#',
-      linkedin: '#',
-      twitter: null,
-      avatar: null,
-    },
-    {
-      name: 'Priya Patel',
-      role: 'Design Lead',
-      bio: "UI/UX designer and front-end developer. Responsible for the club's visual identity and design system.",
-      github: '#',
-      linkedin: '#',
-      twitter: '#',
-      avatar: null,
-    },
-    {
-      name: 'Arjun Mehta',
-      role: 'AI/ML Lead',
-      bio: 'Machine learning researcher and Python enthusiast. Runs the AI/ML workshop series.',
-      github: '#',
-      linkedin: '#',
-      twitter: null,
-      avatar: null,
-    },
-    {
-      name: 'Sneha Gupta',
-      role: 'Community Manager',
-      bio: 'Manages communications, social media and member engagement. The voice of Code2Chill online.',
-      github: '#',
-      linkedin: '#',
-      twitter: '#',
-      avatar: null,
-    },
-    {
-      name: 'Vikram Singh',
-      role: 'Open Source Lead',
-      bio: 'Contributes to open-source projects and guides members through their first pull requests.',
-      github: '#',
-      linkedin: '#',
-      twitter: null,
-      avatar: null,
+      name: 'Prince Pratik',
+      role: 'Member',
+      github: 'https://github.com/ReekursiveMonk',
     },
   ],
 };
+
+// Every member across all groups, in display order.
+export const TEAM_MEMBERS = Object.values(TEAM_DATA).flat();

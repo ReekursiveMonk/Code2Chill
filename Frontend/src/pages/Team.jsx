@@ -18,6 +18,7 @@ function MemberCard({ member, isLead = false }) {
     { icon: LinkedinIcon, href: member.linkedin, label: 'LinkedIn' },
     { icon: XIcon, href: member.twitter, label: 'X' },
   ].filter((s) => s.href && s.href !== '#');
+  const hasDetails = Boolean(member.bio) || socialLinks.length > 0;
 
   return (
     <div
@@ -28,7 +29,7 @@ function MemberCard({ member, isLead = false }) {
       }`}
     >
       {/* Avatar */}
-      <div className="flex items-center gap-4 mb-4">
+      <div className={`flex items-center gap-4 ${hasDetails ? 'mb-4' : ''}`}>
         <div
           className={`w-12 h-12 rounded-xl flex items-center justify-center font-mono font-bold text-sm ${
             isLead
@@ -50,30 +51,36 @@ function MemberCard({ member, isLead = false }) {
           <h3 className="text-base font-semibold text-text-primary group-hover:text-green-primary transition-colors">
             {member.name}
           </h3>
-          <p className="text-xs font-mono text-green-primary/80">{member.role}</p>
+          <p className="mt-0.5 text-xs font-mono text-green-primary [text-shadow:0_0_8px_rgba(88,245,132,0.35)]">
+            {member.role}
+          </p>
         </div>
       </div>
 
-      {/* Bio */}
-      <p className="text-text-secondary text-sm leading-relaxed mb-4">
-        {member.bio}
-      </p>
+      {/* Bio (only when provided) */}
+      {member.bio && (
+        <p className={`text-text-secondary text-sm leading-relaxed ${socialLinks.length > 0 ? 'mb-4' : ''}`}>
+          {member.bio}
+        </p>
+      )}
 
-      {/* Social Links */}
-      <div className="flex gap-2">
-        {socialLinks.map((social) => (
-          <a
-            key={social.label}
-            href={social.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={social.label}
-            className="p-2 rounded-lg text-text-muted hover:text-green-primary hover:bg-green-primary/10 transition-all duration-200"
-          >
-            <social.icon size={15} />
-          </a>
-        ))}
-      </div>
+      {/* Social Links (only when there are real ones) */}
+      {socialLinks.length > 0 && (
+        <div className="flex gap-2">
+          {socialLinks.map((social) => (
+            <a
+              key={social.label}
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={social.label}
+              className="p-2 rounded-lg text-text-muted hover:text-green-primary hover:bg-green-primary/10 transition-all duration-200"
+            >
+              <social.icon size={15} />
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -96,7 +103,7 @@ function Team() {
       <section className="px-4 sm:px-6 lg:px-8 mb-10">
         <div className="max-w-6xl mx-auto">
           <h3 className="text-sm font-mono font-medium text-green-primary/70 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Code2 size={14} /> Club Lead
+            <Code2 size={14} /> Leadership
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {TEAM_DATA.leads.map((member) => (

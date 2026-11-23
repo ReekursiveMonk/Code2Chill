@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, LogIn, LogOut, User } from 'lucide-react';
 import Logo from './Logo';
+import ProfileMenu from './ProfileMenu';
+import { useAuth } from '../context/AuthContext';
+import { getUserInitials } from '../utils/initials';
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -15,12 +18,22 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -29,70 +42,186 @@ function Navbar() {
     setIsOpen(false);
   }, [location.pathname]);
 
+  // Close mobile menu with Escape
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-bg-primary/90 backdrop-blur-md border-b border-border'
-          : 'bg-transparent'
-      }`}
-    >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <nav className="fixed top-0 inset-x-0 z-50 px-3 sm:px-4 pt-3">
+      {/* Floating glass bar. Only colours transition; the blur stays static. */}
+      <div
+        className={`max-w-6xl mx-auto rounded-2xl border backdrop-blur-xl backdrop-saturate-150 transition-[background-color,border-color,box-shadow] duration-300 ${
+          scrolled || isOpen
+            ? 'bg-bg-primary/80 border-green-primary/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_12px_32px_-12px_rgba(0,0,0,0.7)]'
+            : 'bg-bg-secondary/45 border-green-primary/15 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]'
+        }`}
+      >
+        <div className="flex items-center justify-between h-16 px-4 sm:px-5">
           {/* Logo */}
           <Logo />
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
+          {/* Desktop Navigation + account */}
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              {navLinks.map((link) => {
+                const isActive = location.pathname === link.path;
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`relative px-3.5 py-2 rounded-lg text-sm transition-colors duration-200 ${
+                      isActive
+                        ? 'text-green-primary font-semibold'
+                        : 'font-medium text-text-secondary hover:text-text-primary hover:bg-white/5'
+                    }`}
+                  >
+                    {link.name}
+                    {/* Active indicator */}
+                    <span
+                      aria-hidden="true"
+                      className={`absolute left-3.5 right-3.5 -bottom-0.5 h-0.5 rounded-full bg-green-primary shadow-[0_0_10px_rgba(163,255,107,0.7)] origin-left transition-transform duration-300 ${
+                        isActive ? 'scale-x-100' : 'scale-x-0'
+                      }`}
+                    />
+                  </Link>
+                );
+              })}
+            </div>
+
+            {user ? (
+              <ProfileMenu user={user} onLogout={handleLogout} />
+            ) : (
               <Link
-                key={link.path}
-                to={link.path}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  location.pathname === link.path
-                    ? 'text-green-primary bg-green-primary/10'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
+                to="/login"
+                aria-current={isAuthPage ? 'page' : undefined}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border-2 border-green-primary brutal-hover ${
+                  isAuthPage
+                    ? 'bg-green-primary text-bg-primary brutal-shadow-light'
+                    : 'bg-bg-primary text-green-primary'
                 }`}
               >
-                {link.name}
+                <LogIn size={15} aria-hidden="true" />
+                Log in
               </Link>
-            ))}
+            )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
-            aria-label="Toggle menu"
-            aria-expanded={isOpen}
-            aria-controls="mobile-menu"
-          >
-            {isOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Navigation */}
-      <div
-        id="mobile-menu"
-        className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
-          isOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
-        }`}
-      >
-        <div className="bg-bg-primary/95 backdrop-blur-md border-b border-border px-4 pb-4">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`block px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                location.pathname === link.path
-                  ? 'text-green-primary bg-green-primary/10'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
+          {/* Mobile: profile shortcut + menu button */}
+          <div className="flex items-center gap-2 md:hidden">
+            {user && (
+              <Link
+                to="/profile"
+                aria-label="Your profile"
+                className="w-9 h-9 rounded-full bg-green-primary/10 border border-green-primary/30 flex items-center justify-center text-green-primary font-mono text-xs font-bold hover:border-green-primary transition-colors"
+              >
+                {getUserInitials(user)}
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={() => setIsOpen(!isOpen)}
+              className={`p-2 rounded-lg border transition-colors ${
+                isOpen
+                  ? 'border-green-primary/50 text-green-primary bg-green-primary/10'
+                  : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-white/5'
               }`}
+              aria-label="Toggle menu"
+              aria-expanded={isOpen}
+              aria-controls="mobile-menu"
             >
-              {link.name}
-            </Link>
-          ))}
+              {isOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation (inside the same glass bar) */}
+        <div
+          id="mobile-menu"
+          className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+            isOpen ? 'max-h-[36rem] opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="border-t border-green-primary/15 px-3 pt-2 pb-3">
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  aria-current={isActive ? 'page' : undefined}
+                  tabIndex={isOpen ? undefined : -1}
+                  className={`block px-4 py-3 rounded-lg border-l-2 text-sm font-medium transition-colors duration-200 ${
+                    isActive
+                      ? 'border-green-primary text-green-primary bg-green-primary/10'
+                      : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-white/5'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
+
+            {/* Account */}
+            <div className="mt-2 pt-2 border-t border-green-primary/15">
+              {user ? (
+                <>
+                  <div className="px-4 py-2">
+                    <p className="text-sm font-semibold text-text-primary truncate">
+                      {user.name || 'Signed in'}
+                    </p>
+                    <p className="text-xs text-text-muted truncate">{user.email}</p>
+                  </div>
+                  <Link
+                    to="/profile"
+                    aria-current={location.pathname === '/profile' ? 'page' : undefined}
+                    tabIndex={isOpen ? undefined : -1}
+                    className={`flex items-center gap-2 px-4 py-3 rounded-lg border-l-2 text-sm font-medium transition-colors duration-200 ${
+                      location.pathname === '/profile'
+                        ? 'border-green-primary text-green-primary bg-green-primary/10'
+                        : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-white/5'
+                    }`}
+                  >
+                    <User size={16} aria-hidden="true" />
+                    View profile
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    tabIndex={isOpen ? undefined : -1}
+                    className="w-full flex items-center gap-2 px-4 py-3 rounded-lg border-l-2 border-transparent text-sm font-medium text-text-secondary hover:text-red-400 hover:bg-red-400/5 transition-colors duration-200"
+                  >
+                    <LogOut size={16} aria-hidden="true" />
+                    Log out
+                  </button>
+                </>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 pt-2 pb-1 px-1">
+                  <Link
+                    to="/login"
+                    tabIndex={isOpen ? undefined : -1}
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-green-primary text-sm font-semibold text-green-primary bg-bg-primary brutal-hover"
+                  >
+                    <LogIn size={16} aria-hidden="true" />
+                    Log in
+                  </Link>
+                  <Link
+                    to="/signup"
+                    tabIndex={isOpen ? undefined : -1}
+                    className="flex items-center justify-center px-4 py-2.5 rounded-lg border-2 border-green-primary bg-green-primary text-bg-primary text-sm font-semibold brutal-hover brutal-shadow-light"
+                  >
+                    Sign up
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </nav>
