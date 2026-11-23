@@ -36,7 +36,6 @@ const joinApplicationSchema = new mongoose.Schema(
       trim: true,
       maxlength: 254,
       match: EMAIL_PATTERN,
-      index: true,
     },
     year: { type: String, enum: YEAR_OPTIONS, required: true },
     branch: { type: String, required: true, trim: true, maxlength: 100 },
@@ -48,9 +47,36 @@ const joinApplicationSchema = new mongoose.Schema(
     github: { type: String, trim: true, maxlength: 200, default: '' },
     reason: { type: String, trim: true, maxlength: 1000, default: '' },
     status: { type: String, enum: APPLICATION_STATUSES, default: 'pending', index: true },
+    // true while the application is pending or reviewed. Kept in sync with
+    // `status` so the database itself can enforce one open application per email.
+    isOpen: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
+
+// At most ONE open application per email, enforced by MongoDB even if two
+// requests arrive at the same moment. Uses a simple equality filter, which
+// every MongoDB version supports in partial indexes.
+joinApplicationSchema.index(
+  { email: 1 },
+  { unique: true, partialFilterExpression: { isOpen: true }, name: 'one_open_application_per_email' }
+);
+
+joinApplicationSchema.pre('save', function syncOpenFlag() {
+  this.isOpen = OPEN_STATUSES.includes(this.status);
+});
+
+/**
+ * Startup data fix (non-destructive): applications saved before the `isOpen`
+ * field existed get it filled in from their status. Nothing is deleted.
+ */
+joinApplicationSchema.statics.prepareData = async function prepareData() {
+  await this.updateMany({ isOpen: { $exists: false }, status: { $in: OPEN_STATUSES } }, { $set: { isOpen: true } });
+  await this.updateMany(
+    { isOpen: { $exists: false }, status: { $nin: OPEN_STATUSES } },
+    { $set: { isOpen: false } }
+  );
+};
 
 joinApplicationSchema.methods.toPublic = function toPublic() {
   return {

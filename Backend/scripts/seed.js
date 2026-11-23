@@ -1,5 +1,5 @@
 import { loadConfig } from '../config/env.js';
-import { connectDB, disconnectDB } from '../config/db.js';
+import { connectDB, disconnectDB, prepareDatabase, describeConnectionError } from '../config/db.js';
 import TeamMember from '../models/TeamMember.js';
 import Event from '../models/Event.js';
 import Project from '../models/Project.js';
@@ -12,8 +12,11 @@ import { TEAM_MEMBERS, SAMPLE_EVENTS, PROJECTS } from '../data/seedData.js';
  *   npm run seed -- --no-samples          team + real projects only
  *   npm run seed -- --remove-samples      delete everything marked isSample
  *
- * Safe to run more than once: records are matched by name/title and updated,
- * not duplicated. It never creates user accounts.
+ * Safe to run more than once: records are matched by name (team) or title
+ * (events, projects) and updated in place, never duplicated. Only the fields
+ * listed in data/seedData.js are written; anything else you add to a record
+ * (e.g. a bio) is kept. It never reads, creates or changes user accounts or
+ * Join applications, and only deletes data when you pass --remove-samples.
  */
 
 const args = new Set(process.argv.slice(2));
@@ -27,7 +30,14 @@ async function upsertAll(Model, items, key) {
 
 async function run() {
   const config = loadConfig();
-  await connectDB(config.mongodbUri);
+  try {
+    await connectDB(config.mongodbUri, { dbName: config.dbName });
+  } catch (error) {
+    error.message = `${error.message}\n${describeConnectionError(error)}`;
+    throw error;
+  }
+  // Unique indexes on name/title must exist so re-running never duplicates.
+  await prepareDatabase([TeamMember, Event, Project]);
 
   if (args.has('--remove-samples')) {
     const events = await Event.deleteMany({ isSample: true });

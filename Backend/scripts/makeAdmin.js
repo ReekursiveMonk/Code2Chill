@@ -23,7 +23,7 @@ async function run() {
   }
 
   const config = loadConfig();
-  await connectDB(config.mongodbUri);
+  await connectDB(config.mongodbUri, { dbName: config.dbName });
 
   const email = emailArg.trim().toLowerCase();
   const user = await User.findOneAndUpdate({ email }, { role: roleArg }, { new: true });

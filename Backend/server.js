@@ -1,5 +1,6 @@
 import { loadConfig } from './config/env.js';
-import { connectDB, disconnectDB } from './config/db.js';
+import { connectDB, disconnectDB, prepareDatabase, describeConnectionError } from './config/db.js';
+import { ALL_MODELS } from './models/index.js';
 import { createApp } from './app.js';
 
 /**
@@ -17,10 +18,22 @@ async function start() {
   }
 
   try {
-    await connectDB(config.mongodbUri);
+    await connectDB(config.mongodbUri, { dbName: config.dbName });
   } catch (error) {
     console.error('[db] Could not connect to MongoDB:', error.message);
-    console.error('[db] Check MONGODB_URI in .env and that the database is reachable.');
+    console.error(`[db] ${describeConnectionError(error)}`);
+    process.exit(1);
+  }
+
+  // Create required indexes (unique emails, etc.) before accepting requests.
+  try {
+    await prepareDatabase(ALL_MODELS);
+  } catch (error) {
+    console.error('[db] Could not prepare database indexes:', error.message);
+    if (error.code === 11000) {
+      console.error('[db] Existing documents contain duplicates that break a unique index. Remove or merge them, then restart.');
+    }
+    await disconnectDB().catch(() => {});
     process.exit(1);
   }
 
