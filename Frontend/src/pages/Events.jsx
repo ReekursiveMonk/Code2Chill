@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import PageHeader from '../components/PageHeader';
+import { Stagger } from '../components/Reveal';
 import FilterGroup from '../components/FilterGroup';
 import { EventRow, INSTAGRAM_URL } from '../components/HomeSections';
 import { LoadingState, ErrorState } from '../components/DataState';
@@ -21,11 +22,11 @@ function EventGroup({ title, events, note }) {
       </div>
       {note}
       {events.length > 0 && (
-        <ul className="@container animate-stagger">
+        <Stagger as="ul" className="@container">
           {events.map((event) => (
             <EventRow key={event.id} event={event} detailed />
           ))}
-        </ul>
+        </Stagger>
       )}
     </section>
   );
@@ -88,7 +89,9 @@ function Events() {
         </div>
 
         {/* Listings */}
-        <div className="mt-14 sm:mt-16">
+        {/* Keyed by the filters: changing a filter re-mounts the list, so the
+            matching events fade in again instead of jumping into place. */}
+        <div key={`${selectedCategory}|${selectedStatus}`} className="mt-14 sm:mt-16 animate-page">
           {loading ? (
             <LoadingState label={waking ? WAKING_LABEL : 'Loading events…'} />
           ) : error ? (

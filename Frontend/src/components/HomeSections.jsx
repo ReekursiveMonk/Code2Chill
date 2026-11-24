@@ -4,6 +4,7 @@ import { SampleBadge } from './DataState';
 import { GithubIcon } from './BrandIcons';
 import { dateParts, splitEvents, isUpcoming } from '../utils/events';
 import { WAKING_LABEL } from '../hooks/useApiData';
+import { Reveal, Stagger } from './Reveal';
 
 /**
  * Editorial building blocks shared by the guest and member home pages.
@@ -49,19 +50,20 @@ export function ApiBlock({ query, loadingLabel, children }) {
 /* ───────── Section label: number + name on an ink rule ───────── */
 
 export function SectionLabel({ number, children, tone = 'ink' }) {
+  // The rule draws from left to right when the label scrolls into view.
   return (
-    <div
-      className={`pt-3 flex items-baseline justify-between ${
-        tone === 'paper' ? 'border-t border-paper/40' : 'rule-ink'
-      }`}
-    >
+    <Reveal variant="fade" className="relative pt-3 flex items-baseline justify-between">
+      <span
+        aria-hidden="true"
+        className={`reveal-line absolute inset-x-0 top-0 h-px ${tone === 'paper' ? 'bg-paper/40' : 'bg-ink'}`}
+      />
       <p className={`eyebrow ${tone === 'paper' ? '!text-paper' : '!text-text-primary'}`}>{children}</p>
       {number && (
         <p className={`eyebrow ${tone === 'paper' ? '!text-paper/70' : ''}`} aria-hidden="true">
           {number}
         </p>
       )}
-    </div>
+    </Reveal>
   );
 }
 
@@ -139,11 +141,11 @@ export function EventListings({ events = [], limit = 3 }) {
   return (
     <div>
       {upcoming.length > 0 ? (
-        <ul className="@container border-t border-border">
+        <Stagger as="ul" className="@container border-t border-border">
           {upcoming.slice(0, limit).map((event) => (
             <EventRow key={event.id} event={event} />
           ))}
-        </ul>
+        </Stagger>
       ) : (
         <>
           <p className="py-6 border-t border-border text-text-secondary">
@@ -154,11 +156,11 @@ export function EventListings({ events = [], limit = 3 }) {
             .
           </p>
           <p className="eyebrow mt-4 mb-1">From the archive</p>
-          <ul className="@container border-t border-border">
+          <Stagger as="ul" className="@container border-t border-border">
             {past.slice(0, limit).map((event) => (
               <EventRow key={event.id} event={event} />
             ))}
-          </ul>
+          </Stagger>
         </>
       )}
     </div>
@@ -198,10 +200,14 @@ function ProjectLinks({ project }) {
           href={project.live}
           target="_blank"
           rel="noopener noreferrer"
-          className="tap gap-1.5 text-sm font-medium link-quiet"
+          className="group/link tap gap-1.5 text-sm font-medium link-quiet"
         >
           Live site
-          <ArrowUpRight size={14} aria-hidden="true" />
+          <ArrowUpRight
+            size={14}
+            aria-hidden="true"
+            className="transition-transform duration-[var(--dur-hover)] group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5"
+          />
         </a>
       )}
     </div>
@@ -223,7 +229,7 @@ export function ProjectSpread({ projects = [], limit = 3, showLeadVisual = true 
   return (
     <div className="@container">
     <div className="grid grid-cols-1 @3xl:grid-cols-12 gap-10 @3xl:gap-12">
-      <article className={`@3xl:col-span-7 ${showLeadVisual ? '' : 'border-t border-ink pt-6'}`}>
+      <Reveal as="article" className={`@3xl:col-span-7 ${showLeadVisual ? '' : 'border-t border-ink pt-6'}`}>
         {showLeadVisual && (
           <div className="aspect-[2/1] @3xl:aspect-[16/10] bg-sage flex items-end p-6 sm:p-8 mb-6">
             <p className="font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.9] tracking-[-0.04em] text-ink">
@@ -239,12 +245,12 @@ export function ProjectSpread({ projects = [], limit = 3, showLeadVisual = true 
         <p className="text-text-secondary leading-relaxed max-w-xl mb-4">{lead.description}</p>
         <TechList tech={lead.tech} />
         <ProjectLinks project={lead} />
-      </article>
+      </Reveal>
 
       {rest.length > 0 && (
-        <ul className={`@3xl:col-span-5 ${showLeadVisual ? '@3xl:pt-2' : ''}`}>
+        <Stagger as="ul" delay={120} className={`@3xl:col-span-5 ${showLeadVisual ? '@3xl:pt-2' : ''}`}>
           {rest.map((project) => (
-            <li key={project.id} className="py-6 border-t border-border first:border-ink">
+            <li key={project.id} className="group py-6 border-t border-border first:border-ink">
               <div className="flex flex-wrap items-center gap-3 mb-2">
                 <span className="eyebrow !text-accent-ink">{project.category}</span>
                 {project.isSample && <SampleBadge />}
@@ -254,7 +260,7 @@ export function ProjectSpread({ projects = [], limit = 3, showLeadVisual = true 
               <TechList tech={project.tech} />
             </li>
           ))}
-        </ul>
+        </Stagger>
       )}
     </div>
     </div>
@@ -277,10 +283,10 @@ export function LeadershipCards({ leads = [], core = [] }) {
   }
 
   return (
-    <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+    <Stagger as="ul" className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
       {leaders.map((member, index) => (
         <li key={member.id}>
-          <article className="group h-full min-h-[13rem] flex flex-col justify-between gap-10 border border-border bg-bg-card p-6 transition-colors duration-200 hover:border-ink">
+          <article className="group h-full min-h-[13rem] flex flex-col justify-between gap-10 border border-border bg-bg-card p-6 transition-[transform,border-color] duration-[var(--dur-hover)] ease-[var(--ease-out)] hover:-translate-y-1 hover:border-ink">
             <p className="eyebrow" aria-hidden="true">
               {String(index + 1).padStart(2, '0')}
             </p>
@@ -297,7 +303,7 @@ export function LeadershipCards({ leads = [], core = [] }) {
           </article>
         </li>
       ))}
-    </ul>
+    </Stagger>
   );
 }
 

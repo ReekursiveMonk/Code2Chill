@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import { Reveal } from '../components/Reveal';
 import FilterGroup from '../components/FilterGroup';
 import Button from '../components/Button';
 import { GithubIcon } from '../components/BrandIcons';
@@ -82,11 +83,15 @@ function ProjectLinks({ project }) {
           href={project.live}
           target="_blank"
           rel="noopener noreferrer"
-          className="tap gap-1.5 text-sm font-medium link-quiet"
+          className="group/link tap gap-1.5 text-sm font-medium link-quiet"
         >
           Live site
           <span className="sr-only">for {project.title}</span>
-          <ArrowUpRight size={14} aria-hidden="true" />
+          <ArrowUpRight
+            size={14}
+            aria-hidden="true"
+            className="transition-transform duration-[var(--dur-hover)] group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5"
+          />
         </a>
       )}
     </div>
@@ -120,14 +125,21 @@ function FeaturedProject({ project }) {
 
 function ProjectEntry({ project, number }) {
   return (
-    <article className="h-full border-t border-ink pt-5 flex flex-col gap-4">
+    <article className="group relative h-full border-t border-ink pt-5 flex flex-col gap-4">
+      {/* Terracotta rule sweeps across the top edge on hover. */}
+      <span
+        aria-hidden="true"
+        className="absolute left-0 right-0 -top-px h-0.5 bg-accent origin-left scale-x-0 transition-transform duration-[var(--dur-hover)] ease-[var(--ease-out)] group-hover:scale-x-100 group-focus-within:scale-x-100"
+      />
       <div className="flex items-baseline justify-between gap-4">
         <ProjectMeta project={project} />
         <span className="eyebrow" aria-hidden="true">
           {number}
         </span>
       </div>
-      <h3 className="display-sm text-text-primary">{project.title}</h3>
+      <h3 className="display-sm text-text-primary transition-colors duration-[var(--dur-hover)] group-hover:text-accent-ink">
+        {project.title}
+      </h3>
       <p className="text-sm leading-relaxed text-text-secondary">{project.description}</p>
       <TechTags tech={project.tech} />
       <ProjectStats project={project} />
@@ -170,7 +182,7 @@ function Projects() {
           )}
         </div>
 
-        <div className="mt-14 sm:mt-16">
+        <div key={selectedCategory} className="mt-14 sm:mt-16 animate-page">
           {loading ? (
             <LoadingState label={waking ? WAKING_LABEL : 'Loading projects…'} />
           ) : error ? (
@@ -191,14 +203,15 @@ function Projects() {
               {others.length > 0 && (
                 <div className="mt-20 sm:mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-x-10 gap-y-14">
                   {others.map((project, index) => (
-                    <div
+                    <Reveal
                       key={project.id}
+                      delay={(index % 2) * 90}
                       // Asymmetric rhythm: alternate wide/narrow columns, and drop every
                       // second entry a little lower on large screens.
                       className={`${index % 2 === 0 ? 'lg:col-span-7' : 'lg:col-span-5 lg:mt-16'}`}
                     >
                       <ProjectEntry project={project} number={String(index + 2).padStart(2, '0')} />
-                    </div>
+                    </Reveal>
                   ))}
                 </div>
               )}

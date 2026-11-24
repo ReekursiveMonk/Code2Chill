@@ -13,7 +13,7 @@ import { Eye, EyeOff, CircleAlert } from 'lucide-react';
  * - Errors and hints are linked with aria-describedby.
  */
 const CONTROL =
-  'w-full px-3.5 py-3 rounded-none bg-bg-card border text-text-primary text-sm focus:outline-none transition-colors placeholder:text-text-muted';
+  'w-full px-3.5 py-3 rounded-none bg-bg-card border text-text-primary text-sm focus:outline-none transition-[border-color,box-shadow,background-color] duration-[var(--dur-hover)] placeholder:text-text-muted';
 
 function FormField({ id, label, error, type = 'text', hint, optional = false, as = 'input', children, ...inputProps }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -53,8 +53,8 @@ function FormField({ id, label, error, type = 'text', hint, optional = false, as
   }
 
   return (
-    <div>
-      <label htmlFor={id} className="eyebrow !text-text-secondary flex items-baseline justify-between gap-3 mb-2">
+    <div className="group">
+      <label htmlFor={id} className="eyebrow !text-text-secondary group-focus-within:!text-accent-ink transition-colors duration-[var(--dur-hover)] flex items-baseline justify-between gap-3 mb-2">
         <span>
           {label} {!optional && <span className="text-accent-ink" aria-hidden="true">*</span>}
         </span>
@@ -85,7 +85,7 @@ function FormField({ id, label, error, type = 'text', hint, optional = false, as
         </p>
       )}
       {error && (
-        <p id={errorId} className="mt-1.5 flex items-center gap-1.5 text-xs text-danger">
+        <p id={errorId} className="animate-message mt-1.5 flex items-center gap-1.5 text-xs text-danger">
           <CircleAlert size={12} aria-hidden="true" className="shrink-0" />
           {error}
         </p>

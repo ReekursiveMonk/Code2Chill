@@ -14,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { useApiData } from '../hooks/useApiData';
 import { getEvents, getProjects, getTeam } from '../services/api';
 import { getUserInitials } from '../utils/initials';
+import { Stagger } from './Reveal';
 
 /**
  * Home page for signed-in users: a personal "member edition".
@@ -181,7 +182,7 @@ function MemberHome({ user }) {
       {/* Masthead (dark band under the navbar) */}
       <header className="theme-dark pt-24 sm:pt-28 pb-14 sm:pb-20">
         <div className="wrap">
-        <div className="rule-ink pt-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 animate-enter">
+        <div className="rule-draw pt-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 animate-enter">
           <p className="eyebrow !text-text-primary">Member edition</p>
           <p className="eyebrow">{today}</p>
         </div>
@@ -213,7 +214,7 @@ function MemberHome({ user }) {
             <SectionLabel number="01">
               <span id="quick-links">Where to next</span>
             </SectionLabel>
-            <ul className="mt-2">
+            <Stagger as="ul" className="mt-2">
               {QUICK_LINKS.map((link, index) => (
                 <li key={link.to} className="border-b border-border">
                   <Link
@@ -235,7 +236,7 @@ function MemberHome({ user }) {
                   </Link>
                 </li>
               ))}
-            </ul>
+            </Stagger>
           </section>
 
           {/* Events */}

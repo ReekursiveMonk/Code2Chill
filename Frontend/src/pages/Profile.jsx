@@ -47,7 +47,7 @@ function Profile() {
   return (
     <div className="pt-28 sm:pt-36 pb-20 sm:pb-28">
       <div className="wrap">
-        <div className="rule-ink pt-3 flex items-baseline justify-between animate-enter">
+        <div className="rule-draw pt-3 flex items-baseline justify-between animate-enter">
           <p className="eyebrow !text-text-primary">Your profile</p>
           <p className="eyebrow">{user.role === 'admin' ? 'Admin' : 'Member'}</p>
         </div>
@@ -80,7 +80,7 @@ function Profile() {
             <h2 id="account-heading" className="eyebrow !text-text-primary border-t border-ink pt-3">
               Account details
             </h2>
-            <dl>
+            <dl className="animate-stagger [--stagger-start:260ms]">
               {details.map((item) => (
                 <div
                   key={item.label}

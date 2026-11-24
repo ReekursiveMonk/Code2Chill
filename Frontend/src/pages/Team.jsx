@@ -1,4 +1,5 @@
 import PageHeader from '../components/PageHeader';
+import { Reveal, Stagger } from '../components/Reveal';
 import Button from '../components/Button';
 import { LoadingState, ErrorState } from '../components/DataState';
 import { useApiData, WAKING_LABEL } from '../hooks/useApiData';
@@ -44,7 +45,7 @@ function RoleTag({ role, lead }) {
 
 function MemberCard({ member, lead = false, large = false }) {
   return (
-    <article className="h-full flex flex-col border border-border bg-bg-card p-5 sm:p-6 transition-colors duration-200 hover:border-ink">
+    <article className="group h-full flex flex-col border border-border bg-bg-card p-5 sm:p-6 transition-[transform,border-color] duration-[var(--dur-hover)] ease-[var(--ease-out)] hover:-translate-y-1 hover:border-ink">
       <header className="flex items-start justify-between gap-3 pb-4 border-b border-border">
         <h3
           className={`min-w-0 break-words font-display tracking-[-0.02em] text-text-primary leading-tight ${
@@ -115,24 +116,28 @@ function Team() {
             {leads.length > 0 && (
               <section aria-label="Leadership" className="animate-enter enter-delay-2">
                 <GroupHeading count={leads.length}>Leadership</GroupHeading>
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                <Stagger as="ul" className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                   {leads.map((member) => (
                     <li key={member.id}>
                       <MemberCard member={member} lead large />
                     </li>
                   ))}
-                </ul>
+                </Stagger>
               </section>
             )}
 
             {core.length > 0 && (
               <section aria-label="Team members" className={leads.length > 0 ? 'mt-16 sm:mt-20' : ''}>
-                <GroupHeading count={core.length}>Core team &amp; members</GroupHeading>
+                <Reveal variant="fade">
+                  <GroupHeading count={core.length}>Core team &amp; members</GroupHeading>
+                </Reveal>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                  {core.map((member) => (
-                    <li key={member.id}>
+                  {core.map((member, index) => (
+                    // Each card reveals as it scrolls in; cards in the same row
+                    // follow each other by 80ms.
+                    <Reveal as="li" key={member.id} delay={(index % 3) * 80}>
                       <MemberCard member={member} lead={member.role !== 'Member'} />
-                    </li>
+                    </Reveal>
                   ))}
                 </ul>
               </section>

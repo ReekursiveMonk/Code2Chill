@@ -1,9 +1,12 @@
+import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import Button from '../components/Button';
 import ArrowLink from '../components/ArrowLink';
 import MemberHome from '../components/MemberHome';
 import SitePreview from '../components/SitePreview';
+import { Reveal, Stagger } from '../components/Reveal';
+import { useParallax } from '../hooks/useParallax';
 import { PageLoading } from '../components/DataState';
 import {
   ApiBlock,
@@ -42,18 +45,33 @@ const ACTIVITIES = [
 
 /* ───────── Cover ───────── */
 function Cover() {
+  // The three headline lines drift apart very slightly as the page scrolls
+  // (desktop only, off with reduced motion).
+  const line2 = useRef(null);
+  const line3 = useRef(null);
+  useParallax(line2, -0.05, 40);
+  useParallax(line3, -0.1, 70);
+
   return (
     <section className="pt-24 sm:pt-28">
       <div className="wrap">
-        <div className="rule-ink pt-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 animate-enter">
+        <div className="relative pt-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 animate-enter">
+          <span aria-hidden="true" className="animate-rule absolute inset-x-0 top-0 h-px bg-ink" />
           <p className="eyebrow !text-text-primary">Chitkara University · Coding Club</p>
           <p className="eyebrow hidden sm:block">Programmers · Developers · AI enthusiasts</p>
         </div>
 
+        {/* Each line rises out of its own mask, one after another. */}
         <h1 className="display-xl text-text-primary mt-10 sm:mt-16 lg:mt-20">
-          <span className="block animate-enter enter-delay-1">Build.</span>
-          <span className="block sm:pl-[12%] animate-enter enter-delay-2">Connect.</span>
-          <span className="block sm:pl-[28%] italic text-accent animate-enter enter-delay-3">Innovate.</span>
+          <span className="mask-line" style={{ '--line-delay': '80ms' }}>
+            <span>Build.</span>
+          </span>
+          <span ref={line2} className="mask-line sm:pl-[12%]" style={{ '--line-delay': '200ms' }}>
+            <span>Connect.</span>
+          </span>
+          <span ref={line3} className="mask-line sm:pl-[28%] italic text-accent" style={{ '--line-delay': '320ms' }}>
+            <span className="pr-[0.08em]">Innovate.</span>
+          </span>
         </h1>
 
         <div className="mt-12 sm:mt-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-end">
@@ -72,22 +90,22 @@ function Cover() {
 
         {/* Table of contents */}
         <nav aria-label="On this page" className="mt-12 sm:mt-16">
-          <ol className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          <ol className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 animate-stagger [--stagger-start:520ms]">
             {CONTENTS.map((item) => (
               <li key={item.href}>
                 <a
                   href={item.href}
-                  className="group flex h-full min-h-[6.5rem] sm:min-h-[8rem] flex-col justify-between gap-6 border border-border bg-bg-card p-4 sm:p-5 transition-colors duration-200 hover:border-ink hover:bg-sage/35 focus-visible:border-ink"
+                  className="group flex h-full min-h-[6.5rem] sm:min-h-[8rem] flex-col justify-between gap-6 border border-border bg-bg-card p-4 sm:p-5 transition-[background-color,border-color,transform] duration-[var(--dur-hover)] ease-[var(--ease-out)] hover:-translate-y-0.5 hover:border-ink hover:bg-sage/40 active:translate-y-0 active:scale-[0.99] focus-visible:border-ink"
                 >
                   <span className="flex items-center justify-between">
                     <span className="eyebrow transition-colors group-hover:!text-accent-ink">{item.number}</span>
                     <ArrowRight
                       size={16}
                       aria-hidden="true"
-                      className="rotate-90 text-text-muted transition-[transform,color] duration-200 group-hover:translate-y-0.5 group-hover:text-accent-ink"
+                      className="rotate-90 text-text-muted transition-[transform,color] duration-[var(--dur-hover)] ease-[var(--ease-out)] group-hover:translate-y-1.5 group-hover:text-accent-ink"
                     />
                   </span>
-                  <span className="font-display text-2xl sm:text-3xl tracking-[-0.03em] text-text-primary">
+                  <span className="font-display text-2xl sm:text-3xl tracking-[-0.03em] text-text-primary transition-colors duration-[var(--dur-hover)] group-hover:text-accent-ink">
                     {item.label}
                   </span>
                 </a>
@@ -106,15 +124,15 @@ function About() {
     <section id="about" className="scroll-mt-20 pt-12 sm:pt-14 pb-20 sm:pb-28">
       <div className="wrap">
         <SectionLabel number="01">About</SectionLabel>
-        <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <Reveal className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10">
           <h2 className="lg:col-span-3 eyebrow !text-text-primary !text-xs pt-2">What is Code2Chill?</h2>
           <p className="lg:col-span-9 display-md text-text-primary">
             A university developer community where students collaborate, explore new technologies and{' '}
-            <em className="text-accent-ink">build real projects together.</em>
+            <em className="reveal-mark text-accent-ink">build real projects together.</em>
           </p>
-        </div>
+        </Reveal>
 
-        <div className="mt-14 sm:mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
+        <Stagger className="mt-14 sm:mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
           <div className="lg:col-start-4 lg:col-span-4 bg-sage p-6 sm:p-7">
             <h3 className="eyebrow !text-ink mb-3">Our mission</h3>
             <p className="text-ink/85 leading-relaxed">
@@ -129,17 +147,17 @@ function About() {
               ships real code, shares knowledge and grows their technical identity.
             </p>
           </div>
-        </div>
+        </Stagger>
 
         {/* What we do */}
         <div className="mt-20 sm:mt-28 grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-3">
+          <Reveal className="lg:col-span-3">
             <h3 className="display-sm text-text-primary">What we do</h3>
             <p className="mt-3 text-sm text-text-secondary leading-relaxed">
               From weekly coding sessions to inter-college hackathons.
             </p>
-          </div>
-          <ol className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8">
+          </Reveal>
+          <Stagger as="ol" className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8">
             {ACTIVITIES.map((activity, index) => (
               <li key={activity.title} className="border-t border-border py-5">
                 <p className="eyebrow mb-3" aria-hidden="true">
@@ -149,7 +167,7 @@ function About() {
                 <p className="text-sm text-text-secondary leading-relaxed">{activity.text}</p>
               </li>
             ))}
-          </ol>
+          </Stagger>
         </div>
       </div>
     </section>
@@ -165,7 +183,8 @@ function EventsSection() {
       <div className="wrap">
         <SectionLabel number="02">Events</SectionLabel>
         <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-4">
+          {/* The intro stays in view while the listings scroll past (large screens). */}
+          <Reveal className="lg:col-span-4 lg:sticky lg:top-28 lg:self-start">
             <h2 className="display-lg text-text-primary">
               On the <em className="text-accent">calendar</em>
             </h2>
@@ -175,7 +194,7 @@ function EventsSection() {
             <div className="mt-8">
               <ArrowLink to="/events">All events</ArrowLink>
             </div>
-          </div>
+          </Reveal>
           <div className="lg:col-span-8">
             <ApiBlock query={events} loadingLabel="Loading events…">
               {(data) => <EventListings events={data?.events} limit={3} />}
@@ -195,7 +214,7 @@ function ProjectsSection() {
     <section id="projects" className="scroll-mt-20 py-20 sm:py-28">
       <div className="wrap">
         <SectionLabel number="03">Projects</SectionLabel>
-        <div className="mt-10 sm:mt-14 mx-auto max-w-3xl text-center">
+        <Reveal className="mt-10 sm:mt-14 mx-auto max-w-3xl text-center">
           <h2 className="display-lg text-text-primary">
             Projects made by the <em className="text-accent">team</em>
           </h2>
@@ -206,9 +225,11 @@ function ProjectsSection() {
           <div className="mt-6 flex justify-center">
             <ArrowLink to="/projects">All projects</ArrowLink>
           </div>
-        </div>
+        </Reveal>
 
-        <SitePreview className="mt-12 sm:mt-16" />
+        <Reveal variant="scale" className="mt-12 sm:mt-16">
+          <SitePreview />
+        </Reveal>
 
         <div className="mt-16 sm:mt-20">
           <ApiBlock query={projects} loadingLabel="Loading projects…">
@@ -229,7 +250,7 @@ function TeamSection() {
       <div className="wrap">
         <SectionLabel number="04">Team</SectionLabel>
         <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-4">
+          <Reveal className="lg:col-span-4">
             <h2 className="display-lg text-text-primary">
               The <em className="text-accent-ink">people</em>
             </h2>
@@ -239,7 +260,7 @@ function TeamSection() {
             <div className="mt-8">
               <ArrowLink to="/team">Meet the team</ArrowLink>
             </div>
-          </div>
+          </Reveal>
           <div className="lg:col-span-8">
             <ApiBlock query={team} loadingLabel="Loading team…">
               {(data) => <LeadershipCards leads={data?.leads} core={data?.core} />}
@@ -258,10 +279,10 @@ function JoinBand() {
       <div className="wrap">
         <SectionLabel tone="paper">Join</SectionLabel>
         <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
-          <h2 className="lg:col-span-8 display-lg text-paper">
-            Ready to start <em className="text-accent">building?</em>
-          </h2>
-          <div className="lg:col-span-4">
+          <Reveal as="h2" className="lg:col-span-8 display-lg text-paper">
+            Ready to start <em className="reveal-mark text-accent">building?</em>
+          </Reveal>
+          <Reveal className="lg:col-span-4" delay={150}>
             <p className="text-paper/80 leading-relaxed mb-8">
               Join Code2Chill and become part of a community that codes, creates and collaborates. No
               experience required — just curiosity.
@@ -270,7 +291,7 @@ function JoinBand() {
               Join Us Today
               <ArrowRight size={16} aria-hidden="true" />
             </Button>
-          </div>
+          </Reveal>
         </div>
 
         <div className="mt-16 sm:mt-20 pt-6 border-t border-paper/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

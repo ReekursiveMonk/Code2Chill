@@ -271,7 +271,7 @@ function Join() {
                           key={interest}
                           onClick={() => handleInterestToggle(interest)}
                           aria-pressed={isSelected}
-                          className={`min-h-[2.75rem] px-3.5 py-2 text-sm border transition-colors duration-200 ${
+                          className={`min-h-[2.75rem] px-3.5 py-2 text-sm border transition-[color,background-color,border-color,transform] duration-[var(--dur-hover)] active:scale-[0.97] ${
                             isSelected
                               ? 'bg-ink text-paper border-ink'
                               : 'bg-transparent text-text-secondary border-border-strong hover:border-ink hover:text-text-primary'
@@ -339,7 +339,7 @@ function Join() {
                   <p className="text-xs text-text-muted max-w-xs">
                     By applying, you agree to follow our code of conduct.
                   </p>
-                  <Button type="submit" disabled={submitting} className="group sm:min-w-[14rem]">
+                  <Button type="submit" disabled={submitting} aria-busy={submitting} className="group sm:min-w-[14rem]">
                     {submitting ? 'Submitting…' : 'Submit application'}
                     <ArrowRight size={16} aria-hidden="true" className="transition-transform group-hover:translate-x-1" />
                   </Button>

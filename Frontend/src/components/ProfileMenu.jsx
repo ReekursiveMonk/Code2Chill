@@ -70,7 +70,7 @@ function ProfileMenu({ user, onLogout }) {
       {open && (
         <div
           id="profile-menu"
-          className="absolute right-0 mt-4 w-64 bg-bg-card border border-border-strong p-2 animate-fade-in"
+          className="absolute right-0 mt-4 w-64 bg-bg-card border border-border-strong p-2 animate-message"
         >
           <div className="px-3 py-2.5 mb-1 border-b border-border">
             <p className="eyebrow !text-accent-ink mb-1.5">

@@ -158,6 +158,7 @@ function Signup() {
         <button
           type="submit"
           disabled={submitting}
+          aria-busy={submitting}
           className="btn btn-dark w-full group"
         >
           {submitting ? 'Creating account…' : 'Sign Up'}

@@ -17,7 +17,7 @@ function PageHeader({ eyebrow, index, title, intro, children }) {
   return (
     <header className="pt-28 sm:pt-36 pb-10 sm:pb-14">
       <div className="wrap">
-        <div className="rule-ink pt-3 flex items-baseline justify-between animate-enter">
+        <div className="rule-draw pt-3 flex items-baseline justify-between animate-enter">
           <p className="eyebrow !text-text-primary">{eyebrow}</p>
           {index && (
             <p className="eyebrow" aria-hidden="true">

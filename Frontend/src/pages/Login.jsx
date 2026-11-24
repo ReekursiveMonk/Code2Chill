@@ -117,6 +117,7 @@ function Login() {
         <button
           type="submit"
           disabled={submitting}
+          aria-busy={submitting}
           className="btn btn-dark w-full group"
         >
           {submitting ? 'Logging in…' : 'Log In'}

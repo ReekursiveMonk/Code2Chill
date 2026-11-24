@@ -3,6 +3,7 @@ import { ArrowUpRight } from 'lucide-react';
 import Logo from './Logo';
 import { InstagramIcon } from './BrandIcons';
 import { INSTAGRAM_HANDLE, INSTAGRAM_URL } from './HomeSections';
+import { Reveal, Stagger } from './Reveal';
 
 /**
  * Site footer. Join Us is listed for everyone (guests and members), since
@@ -24,7 +25,7 @@ function Footer() {
   return (
     <footer className="theme-dark border-t border-border mt-auto">
       <div className="wrap pt-14 sm:pt-20 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-10">
+        <Stagger className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-10">
           {/* Brand */}
           <div className="md:col-span-5">
             <Logo />
@@ -73,10 +74,19 @@ function Footer() {
               Updates on events, projects and community news.
             </p>
           </div>
-        </div>
+        </Stagger>
+
+        {/* Closing wordmark: a quiet, oversized sign-off for every page. */}
+        <Reveal
+          variant="fade"
+          aria-hidden="true"
+          className="mt-16 sm:mt-24 select-none overflow-hidden whitespace-nowrap font-display leading-[0.85] tracking-[-0.05em] text-[clamp(3.25rem,16vw,14rem)] text-ink/10"
+        >
+          Code2Chill<span className="text-accent/60">.</span>
+        </Reveal>
 
         {/* Bottom bar */}
-        <div className="mt-14 sm:mt-20 pt-6 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="mt-6 sm:mt-8 pt-6 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <p className="text-xs text-text-muted">&copy; {currentYear} Code2Chill. All rights reserved.</p>
           <p className="text-xs text-text-muted">
             <span className="text-accent" aria-hidden="true">

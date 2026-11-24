@@ -59,7 +59,7 @@ export function FormAlert({ message }) {
   return (
     <div
       role="alert"
-      className="flex items-start gap-2 p-3 bg-danger/10 border border-danger/40 text-danger text-sm"
+      className="animate-message flex items-start gap-2 p-3 bg-danger/10 border border-danger/40 text-danger text-sm"
     >
       <CircleAlert size={16} className="shrink-0 mt-0.5" aria-hidden="true" />
       <span>{message}</span>

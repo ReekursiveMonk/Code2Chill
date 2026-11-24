@@ -16,7 +16,7 @@ function AuthLayout({ badge, title, subtitle, aside, children, footer }) {
   return (
     <div className="pt-28 sm:pt-36 pb-20 sm:pb-28">
       <div className="wrap">
-        <div className="rule-ink pt-3 animate-enter">
+        <div className="rule-draw pt-3 animate-enter">
           <p className="eyebrow !text-text-primary">{badge}</p>
         </div>
 

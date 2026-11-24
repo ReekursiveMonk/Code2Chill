@@ -15,7 +15,7 @@ function NotFound() {
   return (
     <div className="pt-28 sm:pt-36 pb-20 sm:pb-28">
       <div className="wrap">
-        <div className="rule-ink pt-3 flex items-baseline justify-between gap-4 animate-enter">
+        <div className="rule-draw pt-3 flex items-baseline justify-between gap-4 animate-enter">
           <p className="eyebrow !text-text-primary">Error</p>
           <p className="eyebrow truncate max-w-[60%]" title={pathname}>
             {pathname}
@@ -25,9 +25,12 @@ function NotFound() {
         <div className="mt-8 sm:mt-12 grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
           <p
             aria-hidden="true"
-            className="lg:col-span-7 font-display text-[clamp(8rem,32vw,22rem)] leading-[0.8] tracking-[-0.06em] text-text-primary animate-enter enter-delay-1"
+            className="mask-line lg:col-span-7 font-display text-[clamp(8rem,32vw,22rem)] leading-[0.8] tracking-[-0.06em] text-text-primary"
+            style={{ '--line-delay': '120ms' }}
           >
-            4<em className="text-accent">0</em>4
+            <span>
+              4<em className="text-accent">0</em>4
+            </span>
           </p>
 
           <div className="lg:col-span-5 lg:pb-6 animate-enter enter-delay-2">

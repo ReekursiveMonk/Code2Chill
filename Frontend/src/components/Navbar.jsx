@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LogOut, User } from 'lucide-react';
 import Logo from './Logo';
@@ -6,6 +6,7 @@ import ProfileMenu from './ProfileMenu';
 import Button from './Button';
 import { useAuth } from '../context/AuthContext';
 import { getUserInitials } from '../utils/initials';
+import { subscribeScroll } from '../utils/motion';
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -35,14 +36,22 @@ function Navbar() {
     navigate('/');
   };
 
+  // One shared scroll listener drives both the bottom border and the reading
+  // progress bar. The bar is updated directly (no React re-render per frame).
+  const progressRef = useRef(null);
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 8);
-    };
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return subscribeScroll((y) => {
+      setScrolled(y > 8);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = max > 0 ? Math.min(1, y / max) : 0;
+      if (progressRef.current) progressRef.current.style.transform = `scaleX(${progress.toFixed(4)})`;
+    });
   }, []);
+
+  // Reset the progress bar when the page changes.
+  useEffect(() => {
+    if (progressRef.current) progressRef.current.style.transform = 'scaleX(0)';
+  }, [location.pathname]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -63,9 +72,16 @@ function Navbar() {
     <nav
       aria-label="Primary"
       className={`theme-dark fixed top-0 inset-x-0 z-50 border-b transition-colors duration-300 ${
-        scrolled || isOpen ? 'border-border' : 'border-transparent'
+        scrolled || isOpen ? 'border-border !bg-bg-secondary' : 'border-transparent'
       }`}
     >
+      {/* Reading progress: a thin terracotta line along the bottom edge. */}
+      <span
+        ref={progressRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute left-0 right-0 -bottom-px h-0.5 bg-accent origin-left"
+        style={{ transform: 'scaleX(0)' }}
+      />
       <div className="wrap">
         <div className="flex items-center justify-between h-16">
           <Logo />
