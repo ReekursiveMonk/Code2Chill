@@ -177,9 +177,10 @@ function MemberHome({ user }) {
   };
 
   return (
-    <div className="pt-24 sm:pt-28 pb-20 sm:pb-28">
-      {/* Masthead */}
-      <header className="wrap">
+    <div className="pb-20 sm:pb-28">
+      {/* Masthead (dark band under the navbar) */}
+      <header className="theme-dark pt-24 sm:pt-28 pb-14 sm:pb-20">
+        <div className="wrap">
         <div className="rule-ink pt-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 animate-enter">
           <p className="eyebrow !text-text-primary">Member edition</p>
           <p className="eyebrow">{today}</p>
@@ -200,6 +201,7 @@ function MemberHome({ user }) {
             Here&apos;s what&apos;s happening at Code2Chill — find an event, pick up a project or say hello
             to the team.
           </p>
+        </div>
         </div>
       </header>
 

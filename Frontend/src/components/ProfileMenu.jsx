@@ -55,7 +55,7 @@ function ProfileMenu({ user, onLogout }) {
       >
         <span
           className={`w-9 h-9 border flex items-center justify-center font-mono text-xs font-medium transition-colors duration-200 ${
-            open ? 'bg-ink text-paper border-ink' : 'border-ink'
+            open ? 'bg-accent text-[#191919] border-accent' : 'border-ink'
           }`}
         >
           {getUserInitials(user)}
@@ -70,7 +70,7 @@ function ProfileMenu({ user, onLogout }) {
       {open && (
         <div
           id="profile-menu"
-          className="absolute right-0 mt-4 w-64 bg-bg-card border border-ink p-2 animate-fade-in"
+          className="absolute right-0 mt-4 w-64 bg-bg-card border border-border-strong p-2 animate-fade-in"
         >
           <div className="px-3 py-2.5 mb-1 border-b border-border">
             <p className="eyebrow !text-accent-ink mb-1.5">

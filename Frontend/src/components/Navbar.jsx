@@ -62,7 +62,7 @@ function Navbar() {
   return (
     <nav
       aria-label="Primary"
-      className={`fixed top-0 inset-x-0 z-50 bg-bg-primary border-b transition-colors duration-300 ${
+      className={`theme-dark fixed top-0 inset-x-0 z-50 border-b transition-colors duration-300 ${
         scrolled || isOpen ? 'border-border' : 'border-transparent'
       }`}
     >
@@ -81,7 +81,7 @@ function Navbar() {
                     to={link.path}
                     aria-current={isActive ? 'page' : undefined}
                     className={`relative py-2 text-sm font-medium transition-colors duration-200 ${
-                      isActive ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'
+                      isActive ? 'text-text-primary' : 'text-text-secondary hover:text-accent-ink'
                     }`}
                   >
                     {link.name}
@@ -111,7 +111,7 @@ function Navbar() {
                 </Link>
                 <Button
                   to="/signup"
-                  variant="dark"
+                  variant="primary"
                   size="sm"
                   aria-current={location.pathname === '/signup' ? 'page' : undefined}
                 >
@@ -164,7 +164,7 @@ function Navbar() {
                   aria-current={isActive ? 'page' : undefined}
                   tabIndex={isOpen ? undefined : -1}
                   className={`flex items-baseline justify-between py-3.5 border-b border-border display-sm ${
-                    isActive ? 'text-accent-ink' : 'text-text-primary'
+                    isActive ? 'text-accent-ink' : 'text-text-primary hover:text-accent-ink'
                   }`}
                 >
                   {link.name}
@@ -217,7 +217,7 @@ function Navbar() {
                 >
                   Log in
                 </Button>
-                <Button to="/signup" variant="dark" tabIndex={isOpen ? undefined : -1}>
+                <Button to="/signup" variant="primary" tabIndex={isOpen ? undefined : -1}>
                   Sign up
                 </Button>
               </div>

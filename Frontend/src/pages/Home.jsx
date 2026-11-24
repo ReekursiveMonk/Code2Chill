@@ -115,16 +115,16 @@ function About() {
         </div>
 
         <div className="mt-14 sm:mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
-          <div className="lg:col-start-4 lg:col-span-4 border-t border-border pt-5">
-            <h3 className="eyebrow mb-3">Our mission</h3>
-            <p className="text-text-secondary leading-relaxed">
+          <div className="lg:col-start-4 lg:col-span-4 bg-sage p-6 sm:p-7">
+            <h3 className="eyebrow !text-ink mb-3">Our mission</h3>
+            <p className="text-ink/85 leading-relaxed">
               To create a welcoming space where students can learn, experiment with technology and develop
               their skills through hands-on projects, workshops and peer collaboration.
             </p>
           </div>
-          <div className="lg:col-span-4 lg:col-start-9 border-t border-border pt-5">
-            <h3 className="eyebrow mb-3">Our vision</h3>
-            <p className="text-text-secondary leading-relaxed">
+          <div className="lg:col-span-4 lg:col-start-9 bg-sand p-6 sm:p-7">
+            <h3 className="eyebrow !text-ink mb-3">Our vision</h3>
+            <p className="text-ink/85 leading-relaxed">
               To build the most active student developer community on campus — a place where every member
               ships real code, shares knowledge and grows their technical identity.
             </p>
@@ -161,7 +161,7 @@ function EventsSection() {
   const events = useApiData(getEvents);
 
   return (
-    <section id="events" className="scroll-mt-20 py-20 sm:py-28 bg-bg-secondary">
+    <section id="events" className="theme-dark scroll-mt-20 py-20 sm:py-28">
       <div className="wrap">
         <SectionLabel number="02">Events</SectionLabel>
         <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -225,13 +225,13 @@ function TeamSection() {
   const team = useApiData(getTeam);
 
   return (
-    <section id="team" className="scroll-mt-20 py-20 sm:py-28 border-t border-border">
+    <section id="team" className="theme-sand scroll-mt-20 py-20 sm:py-28">
       <div className="wrap">
         <SectionLabel number="04">Team</SectionLabel>
         <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-4">
             <h2 className="display-lg text-text-primary">
-              The <em className="text-accent">people</em>
+              The <em className="text-accent-ink">people</em>
             </h2>
             <p className="mt-5 text-text-secondary leading-relaxed max-w-sm">
               The students who run Code2Chill.
@@ -254,7 +254,7 @@ function TeamSection() {
 /* ───────── Join (ink band) ───────── */
 function JoinBand() {
   return (
-    <section className="bg-ink text-paper py-20 sm:py-28">
+    <section className="bg-ink text-paper py-20 sm:py-28 border-b border-paper/10">
       <div className="wrap">
         <SectionLabel tone="paper">Join</SectionLabel>
         <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">

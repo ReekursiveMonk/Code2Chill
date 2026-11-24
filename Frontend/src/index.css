@@ -23,7 +23,7 @@
   /* Surfaces */
   --color-bg-primary: #F4F0E8;   /* paper */
   --color-bg-secondary: #ECE6DA; /* deeper paper, for quiet bands */
-  --color-bg-card: #FAF7F1;      /* lifted paper, for inputs and panels */
+  --color-bg-card: #EDE6D9;      /* warm card / input surface (not white) */
 
   /* Lines */
   --color-border: #D8CDBB;        /* sand: decorative hairlines */
@@ -51,6 +51,47 @@
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-display: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+
+/* =====================================================================
+   Colour scopes
+   Put `theme-dark` or `theme-sand` on a section and every colour utility
+   inside it (text-text-primary, border-border, bg-bg-card, rule-ink,
+   btn-outline, eyebrow...) switches to the matching tones, because those
+   utilities read the CSS variables redefined here.
+
+   Dark scope contrast on #191919: text 15.5:1, secondary 10.7:1,
+   muted 6.6:1, accent-ink 5.8:1. Sand scope on #D8CDBB: muted 4.9:1,
+   accent-ink 5.0:1, secondary 6.0:1.
+   ===================================================================== */
+@utility theme-dark {
+  --color-bg-primary: #191919;
+  --color-bg-secondary: #121212;
+  --color-bg-card: #232220;
+  --color-border: #3A3732;
+  --color-border-light: #2E2C29;
+  --color-border-strong: #6E6A63;
+  --color-text-primary: #F4F0E8;
+  --color-text-secondary: #CFC9BE;
+  --color-text-muted: #A39E94;
+  --color-accent-ink: #E3744E;
+  --color-sage-deep: #B9C5B0;
+  --color-danger: #F08A7E;
+  /* Swap ink and paper so outlines, rules and dark buttons invert. */
+  --color-ink: #F4F0E8;
+  --color-paper: #191919;
+  background-color: #191919;
+  color: #F4F0E8;
+}
+
+@utility theme-sand {
+  --color-bg-primary: #D8CDBB;
+  --color-bg-secondary: #CFC2AD;
+  --color-bg-card: #F4F0E8;
+  --color-border: #C2B49C;
+  --color-text-muted: #57534B;
+  --color-accent-ink: #8F3518;
+  background-color: #D8CDBB;
 }
 
 /* =====================================================================
@@ -190,7 +231,8 @@
 @utility btn-primary {
   background-color: var(--color-accent);
   border-color: var(--color-accent);
-  color: var(--color-ink);
+  /* Always dark text on terracotta (4.5:1), even inside theme-dark. */
+  color: #191919;
 
   &:hover:not(:disabled) {
     background-color: var(--color-ink);

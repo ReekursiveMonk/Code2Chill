@@ -22,7 +22,7 @@ function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-bg-secondary border-t border-ink mt-auto">
+    <footer className="theme-dark border-t border-border mt-auto">
       <div className="wrap pt-14 sm:pt-20 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-10">
           {/* Brand */}
