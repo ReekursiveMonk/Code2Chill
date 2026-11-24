@@ -12,7 +12,7 @@ import {
   INSTAGRAM_URL,
   ProjectSpread,
   SectionLabel,
-  TeamRoster,
+  LeadershipCards,
 } from '../components/HomeSections';
 import { InstagramIcon } from '../components/BrandIcons';
 import { useAuth } from '../context/AuthContext';
@@ -242,7 +242,7 @@ function TeamSection() {
           </div>
           <div className="lg:col-span-8">
             <ApiBlock query={team} loadingLabel="Loading team…">
-              {(data) => <TeamRoster leads={data?.leads} core={data?.core} />}
+              {(data) => <LeadershipCards leads={data?.leads} core={data?.core} />}
             </ApiBlock>
           </div>
         </div>

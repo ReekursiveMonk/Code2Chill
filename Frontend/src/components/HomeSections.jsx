@@ -261,25 +261,40 @@ export function ProjectSpread({ projects = [], limit = 3, showLeadVisual = true 
   );
 }
 
-/* ───────── Team: a typographic roster ───────── */
+/* ───────── Team: leadership cards (homepage) ───────── */
 
-export function TeamRoster({ leads = [], core = [] }) {
-  const members = [...leads, ...core];
-  if (members.length === 0) {
+// The homepage shows only these roles, in this order. Everyone else is on /team.
+const HOME_LEADERSHIP_ROLES = ['President', 'Vice President', 'Tech Head'];
+
+export function LeadershipCards({ leads = [], core = [] }) {
+  const everyone = [...leads, ...core];
+  const leaders = HOME_LEADERSHIP_ROLES.map((role) => everyone.find((member) => member.role === role)).filter(
+    Boolean
+  );
+
+  if (leaders.length === 0) {
     return <p className="py-8 text-text-secondary">The team list hasn't been published yet.</p>;
   }
 
   return (
-    <ul className="border-t border-ink">
-      {members.map((member) => (
-        <li
-          key={member.id}
-          className="group flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 sm:gap-6 py-5 border-b border-border"
-        >
-          <p className="display-md text-text-primary transition-colors duration-200 group-hover:text-accent-ink">
-            {member.name}
-          </p>
-          <p className="eyebrow sm:text-right">{member.role}</p>
+    <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+      {leaders.map((member, index) => (
+        <li key={member.id}>
+          <article className="group h-full min-h-[13rem] flex flex-col justify-between gap-10 border border-border bg-bg-card p-6 transition-colors duration-200 hover:border-ink">
+            <p className="eyebrow" aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
+            </p>
+            <div>
+              <h3 className="font-display text-3xl sm:text-4xl tracking-[-0.03em] leading-none text-text-primary break-words">
+                {member.name}
+              </h3>
+              <p className="mt-4 pt-4 border-t border-border">
+                <span className="inline-block border border-accent-ink px-2 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.14em] leading-none text-accent-ink">
+                  {member.role}
+                </span>
+              </p>
+            </div>
+          </article>
         </li>
       ))}
     </ul>
