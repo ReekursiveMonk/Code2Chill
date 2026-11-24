@@ -1,7 +1,7 @@
 /**
  * Seed data loaded by `npm run seed` (scripts/seed.js).
  *
- * TEAM_MEMBERS is the club's real team.
+ * TEAM_MEMBERS is the club's real team: leadership, core team and members.
  *
  * SAMPLE_EVENTS and the projects marked `isSample: true` are placeholder
  * content copied from the original frontend. They are stored with
@@ -36,6 +36,142 @@ export const TEAM_MEMBERS = [
     github: 'https://github.com/ReekursiveMonk',
     group: 'core',
     order: 1
+  },
+  // Members (added 2026-11-24). Only name, roll number, department and email.
+  {
+    name: 'Pratyush Kumar',
+    role: 'Member',
+    rollNumber: '2610990326',
+    department: 'CSE Core',
+    email: 'pratyush0326.becse26@chitkara.edu.in',
+    group: 'core',
+    order: 2
+  },
+  {
+    name: 'Pranav Pushya',
+    role: 'Member',
+    rollNumber: '2510993126',
+    department: 'CSE AIML',
+    email: 'pranav3126.beai25@chitkara.edu.in',
+    group: 'core',
+    order: 3
+  },
+  {
+    name: 'Harsheen Kaur',
+    role: 'Member',
+    rollNumber: '2610992394',
+    department: 'CSE AIML',
+    email: 'harsheen2394.beaiml26@chitkara.edu.in',
+    group: 'core',
+    order: 4
+  },
+  {
+    name: 'Aastha',
+    role: 'Member',
+    rollNumber: '2610990630',
+    department: 'CSE Core',
+    email: 'aastha0630.becse26@chitkara.edu.in',
+    group: 'core',
+    order: 5
+  },
+  {
+    name: 'Ishant Bansal',
+    role: 'Member',
+    rollNumber: '2610992937',
+    department: 'CSE AIML',
+    email: 'ishant2937.beaiml26@chitkara.edu.in',
+    group: 'core',
+    order: 6
+  },
+  {
+    name: 'Sagarjit Singh Batish',
+    role: 'Member',
+    rollNumber: '2610992174',
+    department: 'CSE AIML',
+    email: 'sagarjit2174.beaiml26@chitkara.edu.in',
+    group: 'core',
+    order: 7
+  },
+  {
+    name: 'Prikshit Goel',
+    role: 'Member',
+    rollNumber: '2610990383',
+    department: 'CSE Core',
+    email: 'prikshit0383.becse26@chitkara.edu.in',
+    group: 'core',
+    order: 8
+  },
+  {
+    name: 'Manpreet Kaur',
+    role: 'Member',
+    rollNumber: '2510991049',
+    department: 'CSE Core',
+    email: 'manpreet1049.becse25@chitkara.edu.in',
+    group: 'core',
+    order: 9
+  },
+  {
+    name: 'Rasik Puri',
+    role: 'Member',
+    rollNumber: '2610991000',
+    department: 'CSE Core',
+    email: 'rasik1000.becse26@chitkara.edu.in',
+    group: 'core',
+    order: 10
+  },
+  {
+    name: 'Ishan',
+    role: 'Member',
+    rollNumber: '2610990480',
+    department: 'CSE Core',
+    email: 'ishan0480.becse26@chitkara.edu.in',
+    group: 'core',
+    order: 11
+  },
+  {
+    name: 'Taranpreet Kaur',
+    role: 'Member',
+    rollNumber: '2510993252',
+    department: 'CSE AIML',
+    email: 'taranpreet3252.beai25@chitkara.edu.in',
+    group: 'core',
+    order: 12
+  },
+  {
+    name: 'Zia Khan',
+    role: 'Member',
+    rollNumber: '2610992704',
+    department: 'CSE AIML',
+    email: 'zia2704.beaiml26@chitkara.edu.in',
+    group: 'core',
+    order: 13
+  },
+  {
+    name: 'Harshdeep Singh',
+    role: 'Member',
+    rollNumber: '2510993025',
+    department: 'CSE AIML',
+    email: 'harshdeep3025.beai25@chitkara.edu.in',
+    group: 'core',
+    order: 14
+  },
+  {
+    name: 'Tushar',
+    role: 'Member',
+    rollNumber: '2510993128',
+    department: 'CSE AIML',
+    email: 'tushar3128.beai25@chitkara.edu.in',
+    group: 'core',
+    order: 15
+  },
+  {
+    name: 'Tanvi Garg',
+    role: 'Member',
+    rollNumber: '2610990964',
+    department: 'CSE Core',
+    email: 'tanvi0964.becse26@chitkara.edu.in',
+    group: 'core',
+    order: 16
   }
 ];
 

@@ -1,111 +1,82 @@
-import { ArrowUpRight } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import Button from '../components/Button';
 import { LoadingState, ErrorState } from '../components/DataState';
 import { useApiData, WAKING_LABEL } from '../hooks/useApiData';
 import { getTeam } from '../services/api';
-import { GithubIcon, LinkedinIcon, XIcon } from '../components/BrandIcons';
 
-function getInitials(name) {
-  return name
-    .split(/\s+/)
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+/**
+ * Team page. Every card shows only: name (with a role tag), roll number,
+ * department and email. Values come from GET /api/team; anything the API
+ * doesn't have for a person is shown as "Not listed".
+ */
+
+const DETAILS = [
+  { key: 'rollNumber', label: 'Roll number', className: 'font-mono tracking-tight' },
+  { key: 'department', label: 'Department', className: '' },
+  { key: 'email', label: 'Email', className: '[overflow-wrap:anywhere]' },
+];
+
+/** Lets a long email wrap before the "@" instead of mid-word. */
+function EmailText({ value }) {
+  const at = value.lastIndexOf('@');
+  if (at <= 0) return value;
+  return (
+    <>
+      {value.slice(0, at)}
+      <wbr />
+      {value.slice(at)}
+    </>
+  );
 }
 
-/** Only the links the API actually provides. */
-function getSocialLinks(member) {
-  return [
-    { icon: GithubIcon, href: member.github, label: 'GitHub' },
-    { icon: LinkedinIcon, href: member.linkedin, label: 'LinkedIn' },
-    { icon: XIcon, href: member.twitter, label: 'X' },
-  ].filter((s) => s.href && s.href !== '#');
-}
-
-/** Square portrait: the real avatar if there is one, otherwise initials. */
-function Portrait({ member, size = 'lg' }) {
-  const box = size === 'lg' ? 'w-20 h-20 sm:w-24 sm:h-24 text-3xl sm:text-4xl' : 'w-14 h-14 text-xl';
-  if (member.avatar) {
-    return <img src={member.avatar} alt="" className={`${box} object-cover shrink-0`} />;
-  }
+/** Leadership roles get a terracotta tag; everyone else a sage "Member" tag. */
+function RoleTag({ role, lead }) {
   return (
     <span
-      aria-hidden="true"
-      className={`${box} shrink-0 bg-sand flex items-center justify-center font-display tracking-[-0.03em] text-ink`}
+      className={`shrink-0 px-2 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.14em] leading-none ${
+        lead ? 'border border-accent-ink text-accent-ink' : 'bg-sage text-ink'
+      }`}
     >
-      {getInitials(member.name)}
+      {role || 'Member'}
     </span>
   );
 }
 
-function SocialLinks({ member }) {
-  const links = getSocialLinks(member);
-  if (links.length === 0) return null;
+function MemberCard({ member, lead = false, large = false }) {
   return (
-    <ul className="flex flex-wrap gap-x-6 gap-y-2">
-      {links.map((social) => (
-        <li key={social.label}>
-          <a
-            href={social.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="tap gap-2 text-sm font-medium link-quiet"
-          >
-            <social.icon size={14} />
-            {social.label}
-            <span className="sr-only">profile of {member.name}</span>
-            <ArrowUpRight size={13} aria-hidden="true" />
-          </a>
-        </li>
-      ))}
-    </ul>
-  );
-}
+    <article className="h-full flex flex-col border border-border bg-bg-card p-5 sm:p-6 transition-colors duration-200 hover:border-ink">
+      <header className="flex items-start justify-between gap-3 pb-4 border-b border-border">
+        <h3
+          className={`min-w-0 break-words font-display tracking-[-0.02em] text-text-primary leading-tight ${
+            large ? 'text-3xl sm:text-4xl' : 'text-2xl'
+          }`}
+        >
+          {member.name}
+        </h3>
+        <RoleTag role={member.role} lead={lead} />
+      </header>
 
-/* ───────── Leadership: full-width typographic rows ───────── */
-
-function LeadRow({ member, number }) {
-  return (
-    <li className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 py-10 sm:py-12 border-b border-border">
-      <div className="md:col-span-2 flex md:block items-center gap-5">
-        <Portrait member={member} />
-        <p className="eyebrow md:mt-4" aria-hidden="true">
-          {number}
-        </p>
-      </div>
-      <div className="md:col-span-6">
-        <h3 className="display-lg text-text-primary">{member.name}</h3>
-      </div>
-      <div className="md:col-span-4 md:pt-4 flex flex-col gap-4">
-        <p className="eyebrow !text-accent-ink !text-xs">{member.role}</p>
-        {member.bio && <p className="text-text-secondary leading-relaxed">{member.bio}</p>}
-        <SocialLinks member={member} />
-      </div>
-    </li>
-  );
-}
-
-/* ───────── Core team: two-column index ───────── */
-
-function CoreEntry({ member }) {
-  return (
-    <li className="border-t border-ink pt-5 pb-8 flex gap-5">
-      <Portrait member={member} size="sm" />
-      <div className="min-w-0 flex flex-col gap-3">
-        <h3 className="display-md text-text-primary break-words">{member.name}</h3>
-        <p className="eyebrow !text-accent-ink">{member.role}</p>
-        {member.bio && <p className="text-sm text-text-secondary leading-relaxed">{member.bio}</p>}
-        <SocialLinks member={member} />
-      </div>
-    </li>
+      <dl className="mt-4 space-y-3 text-sm">
+        {DETAILS.map((detail) => (
+          <div key={detail.key} className="grid grid-cols-[6.5rem_1fr] gap-3 items-baseline">
+            <dt className="eyebrow">{detail.label}</dt>
+            <dd className={`min-w-0 text-text-primary ${member[detail.key] ? detail.className : ''}`}>
+              {member[detail.key] ? (
+                detail.key === 'email' ? <EmailText value={member[detail.key]} /> : member[detail.key]
+              ) : (
+                <span className="text-text-muted">Not listed</span>
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </article>
   );
 }
 
 function GroupHeading({ children, count }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-ink pb-3">
+    <div className="flex items-baseline justify-between gap-4 border-b border-ink pb-3 mb-6 sm:mb-8">
       <h2 className="font-display text-2xl sm:text-3xl tracking-[-0.03em] text-text-primary">{children}</h2>
       <p className="eyebrow">
         {count} {count === 1 ? 'person' : 'people'}
@@ -144,27 +115,24 @@ function Team() {
             {leads.length > 0 && (
               <section aria-label="Leadership" className="animate-enter enter-delay-2">
                 <GroupHeading count={leads.length}>Leadership</GroupHeading>
-                <ol>
-                  {leads.map((member, index) => (
-                    <LeadRow key={member.id} member={member} number={String(index + 1).padStart(2, '0')} />
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                  {leads.map((member) => (
+                    <li key={member.id}>
+                      <MemberCard member={member} lead large />
+                    </li>
                   ))}
-                </ol>
+                </ul>
               </section>
             )}
 
             {core.length > 0 && (
-              <section aria-label="Core team" className="mt-20 sm:mt-24 grid grid-cols-1 lg:grid-cols-12 gap-10">
-                <div className="lg:col-span-4">
-                  <h2 className="display-md text-text-primary">
-                    Core <em className="text-accent">team</em>
-                  </h2>
-                  <p className="eyebrow mt-4">
-                    {core.length} {core.length === 1 ? 'person' : 'people'}
-                  </p>
-                </div>
-                <ul className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-x-10 animate-stagger">
+              <section aria-label="Team members" className={leads.length > 0 ? 'mt-16 sm:mt-20' : ''}>
+                <GroupHeading count={core.length}>Core team &amp; members</GroupHeading>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {core.map((member) => (
-                    <CoreEntry key={member.id} member={member} />
+                    <li key={member.id}>
+                      <MemberCard member={member} lead={member.role !== 'Member'} />
+                    </li>
                   ))}
                 </ul>
               </section>
