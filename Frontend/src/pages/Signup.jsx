@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { UserPlus } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import AuthLayout from '../components/AuthLayout';
 import FormField from '../components/FormField';
 import { FormAlert, PageLoading } from '../components/DataState';
@@ -83,13 +83,26 @@ function Signup() {
 
   return (
     <AuthLayout
-      badge="Join the community"
-      title="Create your account"
-      subtitle="Sign up to get your Code2Chill profile."
+      badge="Sign up"
+      title={
+        <>
+          Create your <em className="text-accent">account.</em>
+        </>
+      }
+      subtitle="Sign up to get your Code2Chill profile and a personal home page for events, projects and the team."
+      aside={
+        <p className="text-sm text-text-muted max-w-sm leading-relaxed">
+          An account is separate from a club membership application. To apply to the club, use the{' '}
+          <Link to="/join" className="link-quiet text-text-primary">
+            Join Us form
+          </Link>
+          .
+        </p>
+      }
       footer={
         <>
           Already have an account?{' '}
-          <Link to="/login" className="text-accent font-medium hover:underline">
+          <Link to="/login" className="font-semibold text-text-primary link-quiet">
             Log in
           </Link>
         </>
@@ -145,10 +158,10 @@ function Signup() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full group flex items-center justify-center gap-2 py-3 rounded-lg bg-accent text-bg-primary font-semibold text-sm hover:bg-accent-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="btn btn-dark w-full group"
         >
           {submitting ? 'Creating account…' : 'Sign Up'}
-          <UserPlus size={16} className="group-hover:translate-x-1 transition-transform" />
+          <ArrowRight size={16} aria-hidden="true" className="transition-transform group-hover:translate-x-1" />
         </button>
       </form>
     </AuthLayout>

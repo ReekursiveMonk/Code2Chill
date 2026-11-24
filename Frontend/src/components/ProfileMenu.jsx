@@ -49,29 +49,31 @@ function ProfileMenu({ user, onLogout }) {
         aria-expanded={open}
         aria-controls="profile-menu"
         aria-label="Open profile menu"
-        className={`flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full border transition-all duration-200 ${
-          open
-            ? 'border-accent bg-accent/10'
-            : 'border-border hover:border-accent/60 hover:bg-white/5'
+        className={`flex items-center gap-2 pr-1 transition-colors duration-200 ${
+          open ? 'text-accent-ink' : 'text-text-primary hover:text-accent-ink'
         }`}
       >
-        <span className="w-8 h-8 rounded-full bg-accent/10 border border-accent/30 flex items-center justify-center text-accent font-mono text-xs font-bold">
+        <span
+          className={`w-9 h-9 border flex items-center justify-center font-mono text-xs font-medium transition-colors duration-200 ${
+            open ? 'bg-ink text-paper border-ink' : 'border-ink'
+          }`}
+        >
           {getUserInitials(user)}
         </span>
         <ChevronDown
           size={14}
           aria-hidden="true"
-          className={`text-text-secondary transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
       {open && (
         <div
           id="profile-menu"
-          className="absolute right-0 mt-3 w-64 rounded-xl glass-strong border border-border shadow-[4px_4px_0_0_rgba(242,169,0,0.35)] p-2 animate-fade-in"
+          className="absolute right-0 mt-4 w-64 bg-bg-card border border-ink p-2 animate-fade-in"
         >
           <div className="px-3 py-2.5 mb-1 border-b border-border">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-accent mb-1">
+            <p className="eyebrow !text-accent-ink mb-1.5">
               Signed in
             </p>
             <p className="text-sm font-semibold text-text-primary truncate">
@@ -81,7 +83,7 @@ function ProfileMenu({ user, onLogout }) {
           </div>
           <Link
             to="/profile"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
+            className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors"
           >
             <User size={15} aria-hidden="true" />
             View profile
@@ -92,7 +94,7 @@ function ProfileMenu({ user, onLogout }) {
               setOpen(false);
               onLogout();
             }}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-red-400 hover:bg-red-400/5 transition-colors"
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-text-secondary hover:text-danger hover:bg-bg-secondary transition-colors"
           >
             <LogOut size={15} aria-hidden="true" />
             Log out

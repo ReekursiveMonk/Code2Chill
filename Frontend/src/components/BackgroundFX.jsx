@@ -1,20 +1,14 @@
 /**
- * Site-wide atmospheric background, fixed behind every page.
+ * Site-wide paper texture, fixed behind every page.
  *
- * Three static layers (no animation, no blur filters):
- *  1. A mostly dark base with faint warm amber/orange light in two corners
- *  2. A very faint grid near the top right
- *  3. Fine film grain for texture
- *
- * It sits at -z-10 inside the app's `isolate` wrapper, so it always stays
- * behind content and never captures clicks.
+ * One static layer of very faint grain on top of the paper colour set on
+ * <body>. No animation, no blur, no gradients. It sits at -z-10 inside the
+ * app's `isolate` wrapper, so it never covers content or captures clicks.
  */
 function BackgroundFX() {
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <div className="absolute inset-0 bg-atmosphere" />
-      <div className="absolute inset-0 bg-grid" />
-      <div className="absolute inset-0 bg-grain opacity-[0.03]" />
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
+      <div className="absolute inset-0 bg-grain opacity-[0.035] mix-blend-multiply" />
     </div>
   );
 }

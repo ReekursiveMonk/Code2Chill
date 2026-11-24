@@ -1,88 +1,33 @@
 import { useState } from 'react';
-import {
-  Calendar,
-  MapPin,
-  Clock,
-  Users,
-  Filter,
-} from 'lucide-react';
-import SectionHeading from '../components/SectionHeading';
-import { LoadingState, ErrorState, EmptyState, SampleBadge } from '../components/DataState';
-import { useApiData } from '../hooks/useApiData';
+import PageHeader from '../components/PageHeader';
+import FilterGroup from '../components/FilterGroup';
+import { EventRow, INSTAGRAM_URL } from '../components/HomeSections';
+import { LoadingState, ErrorState } from '../components/DataState';
+import { useApiData, WAKING_LABEL } from '../hooks/useApiData';
 import { getEvents } from '../services/api';
+import { isUpcoming, splitEvents } from '../utils/events';
 
 const CATEGORIES = ['All', 'Hackathon', 'Workshop', 'Tech Talk', 'Meetup', 'Competition'];
 const STATUS_FILTERS = ['All', 'Upcoming', 'Past'];
 
-// Parse 'YYYY-MM-DD' as a local date (new Date('YYYY-MM-DD') would use UTC).
-function parseLocalDate(isoDate) {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  return new Date(year, month - 1, day);
-}
-
-// An event stays "upcoming" until the end of its last day.
-function getEventStatus(event, now = new Date()) {
-  const lastDay = parseLocalDate(event.endDate || event.startDate);
-  lastDay.setHours(23, 59, 59, 999);
-  return lastDay >= now ? 'upcoming' : 'past';
-}
-
-function EventCard({ event }) {
-  const isUpcoming = event.status === 'upcoming';
-
+function EventGroup({ title, events, note }) {
   return (
-    <div className="group h-full p-5 rounded-xl bg-bg-card border border-border hover:border-accent/50 transition-colors duration-200">
-      {/* Top row: category + status */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <span className="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-accent/10 text-accent border border-accent/20">
-            {event.category}
-          </span>
-          {event.isSample && <SampleBadge />}
-        </div>
-        <span
-          className={`px-2.5 py-1 rounded-md text-xs font-medium ${
-            isUpcoming
-              ? 'bg-accent-2/10 text-accent-2'
-              : 'bg-white/5 text-text-muted'
-          }`}
-        >
-          {isUpcoming ? '● Upcoming' : 'Past'}
-        </span>
+    <section aria-label={title} className="mb-16 last:mb-0">
+      <div className="flex items-baseline justify-between gap-4 border-b border-ink pb-3">
+        <h2 className="font-display text-2xl sm:text-3xl tracking-[-0.03em] text-text-primary">{title}</h2>
+        <p className="eyebrow">
+          {events.length} {events.length === 1 ? 'event' : 'events'}
+        </p>
       </div>
-
-      {/* Title */}
-      <h3 className="text-lg font-semibold text-text-primary mb-2 group-hover:text-accent transition-colors">
-        {event.title}
-      </h3>
-
-      {/* Description */}
-      <p className="text-text-secondary text-sm leading-relaxed mb-4">
-        {event.description}
-      </p>
-
-      {/* Meta */}
-      <div className="space-y-2 text-xs text-text-muted">
-        <div className="flex items-center gap-2">
-          <Calendar size={14} className="text-accent/70" />
-          <span>{event.date}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock size={14} className="text-accent/70" />
-          <span>{event.time}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <MapPin size={14} className="text-accent/70" />
-          <span>{event.location}</span>
-        </div>
-        {event.attendees != null && (
-          <div className="flex items-center gap-2">
-            <Users size={14} className="text-accent/70" />
-            <span>{event.attendees} {isUpcoming ? 'expected' : 'attended'}</span>
-          </div>
-        )}
-      </div>
-    </div>
+      {note}
+      {events.length > 0 && (
+        <ul className="@container animate-stagger">
+          {events.map((event) => (
+            <EventRow key={event.id} event={event} detailed />
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
@@ -90,95 +35,118 @@ function Events() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
 
-  const { data, loading, error, retry } = useApiData(getEvents);
+  const { data, loading, waking, error, retry } = useApiData(getEvents);
+  const allEvents = data?.events || [];
 
-  const eventsWithStatus = (data?.events || []).map((event) => ({
-    ...event,
-    status: getEventStatus(event),
-  }));
-
-  const filteredEvents = eventsWithStatus.filter((event) => {
-    const categoryMatch =
-      selectedCategory === 'All' || event.category === selectedCategory;
+  const filteredEvents = allEvents.filter((event) => {
+    const categoryMatch = selectedCategory === 'All' || event.category === selectedCategory;
+    const upcoming = isUpcoming(event);
     const statusMatch =
       selectedStatus === 'All' ||
-      event.status === selectedStatus.toLowerCase();
+      (selectedStatus === 'Upcoming' && upcoming) ||
+      (selectedStatus === 'Past' && !upcoming);
     return categoryMatch && statusMatch;
   });
+  const { upcoming, past } = splitEvents(filteredEvents);
+  const filtersActive = selectedCategory !== 'All' || selectedStatus !== 'All';
+
+  const clearFilters = () => {
+    setSelectedCategory('All');
+    setSelectedStatus('All');
+  };
 
   return (
-    <div className="pt-24 pb-14">
-      {/* Header */}
-      <section className="px-4 sm:px-6 lg:px-8 mb-8">
-        <div className="max-w-6xl mx-auto">
-          <SectionHeading
-            badge="Events"
-            title="Events & Activities"
-            description="From hackathons and workshops to casual meetups — stay updated with everything happening at Code2Chill."
-          />
+    <div className="pb-20 sm:pb-28">
+      <PageHeader
+        eyebrow="Events"
+        index="02"
+        title={
+          <>
+            Events &amp; <em className="text-accent">activities</em>
+          </>
+        }
+        intro="From hackathons and workshops to casual meetups — stay updated with everything happening at Code2Chill."
+      />
 
-          {/* Filters */}
-          <div className="animate-enter enter-delay-1 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-center">
-            {/* Category Filter */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <Filter size={14} className="text-text-muted" />
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
-                    selectedCategory === cat
-                      ? 'bg-accent/10 text-accent border border-accent/20'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            {/* Status Filter */}
-            <div className="flex items-center gap-2">
-              {STATUS_FILTERS.map((status) => (
-                <button
-                  key={status}
-                  onClick={() => setSelectedStatus(status)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
-                    selectedStatus === status
-                      ? 'bg-accent/10 text-accent border border-accent/20'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
-                  }`}
-                >
-                  {status}
-                </button>
-              ))}
-            </div>
+      <div className="wrap">
+        {/* Filters */}
+        <div className="animate-enter enter-delay-2 border-y border-border py-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4">
+            <FilterGroup
+              label="Category"
+              options={CATEGORIES}
+              value={selectedCategory}
+              onChange={setSelectedCategory}
+            />
+            <FilterGroup label="When" options={STATUS_FILTERS} value={selectedStatus} onChange={setSelectedStatus} />
           </div>
-        </div>
-      </section>
-
-      {/* Events Grid */}
-      <section className="px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          {loading ? (
-            <LoadingState label="Loading events…" />
-          ) : error ? (
-            <ErrorState message={error.message} onRetry={retry} />
-          ) : eventsWithStatus.length === 0 ? (
-            <EmptyState icon={Calendar} message="No events have been announced yet." />
-          ) : filteredEvents.length > 0 ? (
-            <div className="animate-stagger grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          ) : (
-            <div className="animate-enter">
-              <EmptyState icon={Calendar} message="No events found for the selected filters." />
-            </div>
+          {!loading && !error && (
+            <p className="eyebrow lg:text-right" aria-live="polite">
+              Showing {filteredEvents.length} of {allEvents.length}
+            </p>
           )}
         </div>
-      </section>
+
+        {/* Listings */}
+        <div className="mt-14 sm:mt-16">
+          {loading ? (
+            <LoadingState label={waking ? WAKING_LABEL : 'Loading events…'} />
+          ) : error ? (
+            <ErrorState message={error.message} onRetry={retry} />
+          ) : allEvents.length === 0 ? (
+            <div className="py-12 max-w-xl">
+              <p className="display-sm text-text-primary mb-3">No events have been announced yet.</p>
+              <p className="text-text-secondary">
+                New dates are posted on{' '}
+                <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="link-quiet text-text-primary">
+                  Instagram
+                </a>
+                .
+              </p>
+            </div>
+          ) : filteredEvents.length === 0 ? (
+            <div className="py-12 max-w-xl animate-enter">
+              <p className="display-sm text-text-primary mb-3">No events match these filters.</p>
+              <p className="text-text-secondary mb-6">
+                {selectedStatus === 'Upcoming'
+                  ? 'Nothing is scheduled for this selection yet.'
+                  : 'Try a different category or time.'}
+              </p>
+              {filtersActive && (
+                <button type="button" onClick={clearFilters} className="btn btn-outline btn-sm">
+                  Clear filters
+                </button>
+              )}
+            </div>
+          ) : (
+            <>
+              {selectedStatus !== 'Past' && (
+                <EventGroup
+                  title="Upcoming"
+                  events={upcoming}
+                  note={
+                    upcoming.length === 0 && (
+                      <p className="py-6 text-text-secondary">
+                        No upcoming events are scheduled right now. New dates are announced on{' '}
+                        <a
+                          href={INSTAGRAM_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="link-quiet text-text-primary"
+                        >
+                          Instagram
+                        </a>
+                        .
+                      </p>
+                    )
+                  }
+                />
+              )}
+              {selectedStatus !== 'Upcoming' && past.length > 0 && <EventGroup title="Past events" events={past} />}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

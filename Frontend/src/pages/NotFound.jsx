@@ -1,50 +1,61 @@
-import { Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Terminal } from 'lucide-react';
-import SectionHeading from '../components/SectionHeading';
+import { useLocation } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import Button from '../components/Button';
+import ArrowLink from '../components/ArrowLink';
+
+const SUGGESTIONS = [
+  { to: '/events', label: 'Events' },
+  { to: '/projects', label: 'Projects' },
+  { to: '/team', label: 'Team' },
+];
 
 function NotFound() {
   const { pathname } = useLocation();
 
   return (
-    <div className="pt-24 pb-14 min-h-[60vh] flex items-center">
-      <section className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Error code */}
-          <p className="animate-enter text-center font-mono font-bold text-6xl sm:text-7xl text-accent mb-4">
-            404
+    <div className="pt-28 sm:pt-36 pb-20 sm:pb-28">
+      <div className="wrap">
+        <div className="rule-ink pt-3 flex items-baseline justify-between gap-4 animate-enter">
+          <p className="eyebrow !text-text-primary">Error</p>
+          <p className="eyebrow truncate max-w-[60%]" title={pathname}>
+            {pathname}
+          </p>
+        </div>
+
+        <div className="mt-8 sm:mt-12 grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
+          <p
+            aria-hidden="true"
+            className="lg:col-span-7 font-display text-[clamp(8rem,32vw,22rem)] leading-[0.8] tracking-[-0.06em] text-text-primary animate-enter enter-delay-1"
+          >
+            4<em className="text-accent">0</em>4
           </p>
 
-          <SectionHeading
-            badge="Error 404"
-            title="Page Not Found"
-            description="The page you're looking for doesn't exist or may have been moved."
-          />
-
-          {/* Requested path */}
-          <div className="animate-enter enter-delay-1 max-w-md mx-auto mb-8 p-4 rounded-xl bg-bg-card border border-border font-mono text-xs sm:text-sm">
-            <div className="flex items-center gap-2 text-text-muted mb-2">
-              <Terminal size={14} className="text-accent" />
-              <span>request</span>
-            </div>
-            <p className="text-text-secondary break-all">
-              <span className="text-accent">&gt; GET</span> {pathname}
+          <div className="lg:col-span-5 lg:pb-6 animate-enter enter-delay-2">
+            <h1 className="display-md text-text-primary">
+              This page has <em className="text-accent">gone missing.</em>
+            </h1>
+            <p className="mt-5 text-text-secondary leading-relaxed max-w-md">
+              The page you&apos;re looking for doesn&apos;t exist or may have been moved.
             </p>
-            <p className="text-text-muted mt-1">404 Not Found</p>
-          </div>
-
-          {/* Back home */}
-          <div className="animate-enter enter-delay-2 flex justify-center">
-            <Link
-              to="/"
-              className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-bg-primary font-semibold text-sm
-                         hover:bg-accent-2 transition-colors duration-200"
-            >
-              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-              Back to Home
-            </Link>
+            <div className="mt-8">
+              <Button to="/" variant="dark" className="group">
+                <ArrowLeft size={16} aria-hidden="true" className="transition-transform group-hover:-translate-x-1" />
+                Back to Home
+              </Button>
+            </div>
+            <div className="mt-10 pt-5 border-t border-border">
+              <p className="eyebrow mb-3">Or try</p>
+              <ul className="flex flex-wrap gap-x-8 gap-y-3">
+                {SUGGESTIONS.map((item) => (
+                  <li key={item.to}>
+                    <ArrowLink to={item.to}>{item.label}</ArrowLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

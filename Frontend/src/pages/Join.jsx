@@ -1,16 +1,26 @@
 import { useState } from 'react';
-import {
-  Send,
-  CheckCircle2,
-  Sparkles,
-  Terminal,
-} from 'lucide-react';
-import SectionHeading from '../components/SectionHeading';
+import { ArrowRight } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import FormField from '../components/FormField';
+import Button from '../components/Button';
+import { FormAlert } from '../components/DataState';
 import { submitJoinApplication } from '../services/api';
+import { validateEmail } from '../utils/validation';
 
-// Shared style for every text input, select and textarea in the form.
-const INPUT_CLASS =
-  'w-full px-3.5 py-2.5 rounded-lg bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-accent/60 transition-colors placeholder:text-text-muted';
+// Option values must match the backend (models/JoinApplication.js).
+const YEAR_OPTIONS = [
+  { value: '1st Year', label: '1st Year (Freshman)' },
+  { value: '2nd Year', label: '2nd Year (Sophomore)' },
+  { value: '3rd Year', label: '3rd Year (Junior)' },
+  { value: '4th Year', label: '4th Year (Senior)' },
+  { value: 'Postgraduate', label: 'Postgraduate' },
+];
+
+const EXPERIENCE_OPTIONS = [
+  { value: 'Beginner', label: 'Beginner (Learning syntax / 0-6 months)' },
+  { value: 'Intermediate', label: 'Intermediate (Built basic projects / 1-2 years)' },
+  { value: 'Advanced', label: 'Advanced (Full-stack, hackathons / 2+ years)' },
+];
 
 const INTEREST_OPTIONS = [
   'Web Development',
@@ -23,18 +33,31 @@ const INTEREST_OPTIONS = [
   'Open Source',
 ];
 
+const BENEFITS = [
+  'Learn alongside fellow students.',
+  'Collaborate on practical projects.',
+  'Discover hackathons and technical events.',
+  'Develop teamwork and problem-solving skills.',
+];
+
+const CODE_OF_CONDUCT = [
+  ['Curiosity first', 'No question is too basic. We all started at line 1.'],
+  ['Build openly', 'Share your knowledge, credit contributors, and write readable code.'],
+  ['Inclusive community', 'Respect everyone regardless of skill level, background, or identity.'],
+];
+
 const FAQS = [
   {
     q: 'Do I need prior coding experience to join?',
-    a: 'Not at all! Code2Chill welcomes everyone from absolute beginners writing their first "Hello World" to experienced hackers building complex systems. We hold beginner workshops and provide active mentorship.',
+    a: 'Not at all! Code2Chill welcomes everyone from absolute beginners writing their first "Hello World" to experienced hackers building complex systems. Opportunities to learn through workshops, peer collaboration, and guidance from other members.',
   },
   {
     q: 'How much time commitment is expected?',
-    a: 'Most members spend 2–4 hours per week attending meetups, weekend coding sprints, or working on collaborative projects at their own pace.',
+    a: "There's no fixed time requirement. Members can participate in events and projects at their own pace.",
   },
   {
     q: 'Is membership free?',
-    a: 'Yes, 100% free. Code2Chill is an open, student-led community dedicated to peer learning and building cool software together.',
+    a: 'Membership details, including any applicable costs, will be shared by the club team after your application is reviewed.',
   },
   {
     q: 'What kind of projects will I work on?',
@@ -42,395 +65,349 @@ const FAQS = [
   },
 ];
 
-function Join() {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    year: '1st Year',
-    branch: '',
-    interests: [],
-    experience: 'Beginner',
-    github: '',
-    reason: '',
-  });
+const EMPTY_FORM = {
+  fullName: '',
+  email: '',
+  year: '1st Year',
+  branch: '',
+  interests: [],
+  experience: 'Beginner',
+  github: '',
+  reason: '',
+};
 
+// Browser-side checks for the required fields. The server checks everything
+// again and its field messages are shown the same way.
+function validate(values) {
+  return {
+    fullName: values.fullName.trim() ? '' : 'Please enter your full name.',
+    email: validateEmail(values.email),
+    branch: values.branch.trim() ? '' : 'Please enter your branch or major.',
+  };
+}
+
+/* ───────── Success state ───────── */
+function Submitted({ name, onReset }) {
+  return (
+    <div role="status" className="border-t border-ink pt-10 animate-enter">
+      <p className="eyebrow !text-sage-deep mb-4">Application received</p>
+      <h2 className="display-md text-text-primary">
+        Thank you, <em className="text-accent">{name}.</em>
+      </h2>
+      <p className="mt-5 text-text-secondary leading-relaxed max-w-lg">
+        Your application has been received and will be reviewed by the Code2Chill team.
+      </p>
+      <dl className="mt-8 inline-flex items-baseline gap-4 border border-border px-4 py-3">
+        <dt className="eyebrow">Status</dt>
+        <dd className="text-sm font-semibold text-text-primary">Pending review</dd>
+      </dl>
+      <div className="mt-10">
+        <button type="button" onClick={onReset} className="tap text-sm font-medium link-quiet">
+          Submit another response
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Join() {
+  const [formData, setFormData] = useState(EMPTY_FORM);
+  const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleInterestToggle = (interest) => {
-    setFormData((prev) => {
-      const exists = prev.interests.includes(interest);
-      if (exists) {
-        return {
-          ...prev,
-          interests: prev.interests.filter((item) => item !== interest),
-        };
-      } else {
-        return {
-          ...prev,
-          interests: [...prev.interests, interest],
-        };
-      }
-    });
+    setFormData((prev) => ({
+      ...prev,
+      interests: prev.interests.includes(interest)
+        ? prev.interests.filter((item) => item !== interest)
+        : [...prev.interests, interest],
+    }));
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear a field's error as soon as the person edits it.
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.fullName.trim() || !formData.email.trim() || !formData.branch.trim()) {
-      setError('Please fill in all required fields.');
+    const nextErrors = validate(formData);
+    if (Object.values(nextErrors).some(Boolean)) {
+      setErrors(nextErrors);
+      setError('Please fix the highlighted fields.');
+      const firstInvalid = Object.keys(nextErrors).find((key) => nextErrors[key]);
+      document.getElementById(`join-${firstInvalid}`)?.focus();
       return;
     }
+    setErrors({});
     setError('');
     setSubmitting(true);
     try {
       await submitJoinApplication(formData);
       setSubmitted(true);
+      window.scrollTo({ top: 0 });
     } catch (err) {
-      // Show the server's field messages if there are any, otherwise its message.
-      setError(err.errors ? Object.values(err.errors).join(' ') : err.message);
+      // Show the server's field messages next to their fields, plus its message.
+      if (err.errors) setErrors(err.errors);
+      setError(err.message);
     } finally {
       setSubmitting(false);
     }
   };
 
+  const resetForm = () => {
+    setSubmitted(false);
+    setFormData(EMPTY_FORM);
+    setErrors({});
+    setError('');
+  };
+
   return (
-    <div className="pt-24 pb-14">
-      {/* Header */}
-      <section className="px-4 sm:px-6 lg:px-8 mb-8">
-        <div className="max-w-6xl mx-auto">
-          <SectionHeading
-            badge="Join Code2Chill"
-            title="Become a Member"
-            description="Ready to code, collaborate, and innovate? Join our community of student builders and creators."
-          />
-        </div>
-      </section>
+    <div className="pb-20 sm:pb-28">
+      <PageHeader
+        eyebrow="Join Us"
+        index="05"
+        title={
+          <>
+            Become a <em className="text-accent">member</em>
+          </>
+        }
+        intro="Ready to code, collaborate, and innovate? Join our community of student builders and creators."
+      />
 
-      {/* Main Content: Form & Benefits */}
-      <section className="px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
-          {/* Left Column: Form (7 cols) */}
-          <div className="lg:col-span-7 animate-enter enter-delay-1">
-            <div className="p-5 sm:p-6 rounded-xl bg-bg-card border border-border">
-              {submitted ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center mx-auto mb-5 text-accent animate-fade-in">
-                    <CheckCircle2 size={36} />
-                  </div>
-                  <h3 className="text-2xl font-bold text-text-primary mb-3">
-                    Application Submitted
-                  </h3>
-                  <p className="text-text-secondary text-sm max-w-md mx-auto mb-6 leading-relaxed">
-                    Thank you, <span className="text-accent font-medium">{formData.fullName}</span>!
-                    Your application has been received and will be reviewed by the Code2Chill team.
-                  </p>
-                  <div className="inline-block px-4 py-2 rounded-lg bg-bg-primary border border-border text-xs font-mono text-text-muted">
-                    Status: <span className="text-accent">Pending review</span>
-                  </div>
-                  <div className="mt-6">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSubmitted(false);
-                        setFormData({
-                          fullName: '',
-                          email: '',
-                          year: '1st Year',
-                          branch: '',
-                          interests: [],
-                          experience: 'Beginner',
-                          github: '',
-                          reason: '',
-                        });
-                      }}
-                      className="px-5 py-2.5 rounded-lg border border-border text-text-secondary text-xs hover:text-text-primary hover:border-accent/30 transition-colors"
-                    >
-                      Submit Another Response
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="pb-4 border-b border-border">
-                    <h3 className="text-lg font-semibold text-text-primary mb-1">
-                      Membership Application
-                    </h3>
-                    <p className="text-xs text-text-muted">
-                      Fill out the form below to join the Code2Chill developer community.
-                    </p>
-                  </div>
+      <div className="wrap grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-12">
+        {/* Form */}
+        <section aria-labelledby="application-heading" className="lg:col-span-7 animate-enter enter-delay-2">
+          {submitted ? (
+            <Submitted name={formData.fullName.trim()} onReset={resetForm} />
+          ) : (
+            <form onSubmit={handleSubmit} noValidate className="border-t border-ink pt-8">
+              <div className="flex items-baseline justify-between gap-4 mb-2">
+                <h2 id="application-heading" className="display-sm text-text-primary">
+                  Membership application
+                </h2>
+                <p className="eyebrow hidden sm:block">
+                  <span className="text-accent-ink">*</span> Required
+                </p>
+              </div>
+              <p className="text-sm text-text-secondary mb-8">
+                Fill out the form below to join the Code2Chill developer community.
+              </p>
 
-                  {error && (
-                    <div role="alert" className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
-                      {error}
-                    </div>
-                  )}
+              <div className="space-y-6">
+                <FormAlert message={error} />
 
-                  {/* Name & Email */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="join-fullName" className="block text-xs font-mono text-text-secondary mb-2">
-                        Full Name <span className="text-accent">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="join-fullName"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        required
-                        placeholder="Alex Rivera"
-                        className={INPUT_CLASS}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="join-email" className="block text-xs font-mono text-text-secondary mb-2">
-                        Email Address <span className="text-accent">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        id="join-email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        placeholder="exampleXXXX@chitkara.edu.in"
-                        className={INPUT_CLASS}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Year & Branch */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="join-year" className="block text-xs font-mono text-text-secondary mb-2">
-                        Year of Study
-                      </label>
-                      <select
-                        id="join-year"
-                        name="year"
-                        value={formData.year}
-                        onChange={handleChange}
-                        className={INPUT_CLASS}
-                      >
-                        <option value="1st Year">1st Year (Freshman)</option>
-                        <option value="2nd Year">2nd Year (Sophomore)</option>
-                        <option value="3rd Year">3rd Year (Junior)</option>
-                        <option value="4th Year">4th Year (Senior)</option>
-                        <option value="Postgraduate">Postgraduate</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label htmlFor="join-branch" className="block text-xs font-mono text-text-secondary mb-2">
-                        Branch / Major <span className="text-accent">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="join-branch"
-                        name="branch"
-                        value={formData.branch}
-                        onChange={handleChange}
-                        required
-                        placeholder="e.g. Computer Science & Eng."
-                        className={INPUT_CLASS}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Areas of Interest */}
-                  <div>
-                    <label id="join-interests-label" className="block text-xs font-mono text-text-secondary mb-2">
-                      Areas of Interest (Select all that apply)
-                    </label>
-                    <div className="flex flex-wrap gap-2" role="group" aria-labelledby="join-interests-label">
-                      {INTEREST_OPTIONS.map((interest) => {
-                        const isSelected = formData.interests.includes(interest);
-                        return (
-                          <button
-                            type="button"
-                            key={interest}
-                            onClick={() => handleInterestToggle(interest)}
-                            aria-pressed={isSelected}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
-                              isSelected
-                                ? 'bg-accent/15 text-accent border border-accent/40'
-                                : 'bg-bg-primary text-text-secondary border border-border hover:border-accent/50'
-                            }`}
-                          >
-                            {interest}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Experience Level & GitHub */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="join-experience" className="block text-xs font-mono text-text-secondary mb-2">
-                        Coding Experience Level
-                      </label>
-                      <select
-                        id="join-experience"
-                        name="experience"
-                        value={formData.experience}
-                        onChange={handleChange}
-                        className={INPUT_CLASS}
-                      >
-                        <option value="Beginner">Beginner (Learning syntax / 0-6 months)</option>
-                        <option value="Intermediate">Intermediate (Built basic projects / 1-2 years)</option>
-                        <option value="Advanced">Advanced (Full-stack, hackathons / 2+ years)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label htmlFor="join-github" className="block text-xs font-mono text-text-secondary mb-2">
-                        GitHub / Portfolio (Optional)
-                      </label>
-                      <input
-                        type="url"
-                        id="join-github"
-                        name="github"
-                        value={formData.github}
-                        onChange={handleChange}
-                        placeholder="https://github.com/username"
-                        className={INPUT_CLASS}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Why join */}
-                  <div>
-                    <label htmlFor="join-reason" className="block text-xs font-mono text-text-secondary mb-2">
-                      Why do you want to join Code2Chill?
-                    </label>
-                    <textarea
-                      id="join-reason"
-                      name="reason"
-                      value={formData.reason}
+                {/* 01 About you */}
+                <fieldset>
+                  <legend className="eyebrow !text-text-primary mb-5 flex items-center gap-3 float-left w-full">
+                    <span className="text-text-muted">01</span> About you
+                  </legend>
+                  <div className="clear-both grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <FormField
+                      id="join-fullName"
+                      name="fullName"
+                      label="Full name"
+                      autoComplete="name"
+                      placeholder="Alex Rivera"
+                      value={formData.fullName}
                       onChange={handleChange}
-                      rows={3}
-                      placeholder="Tell us what you hope to build, learn or contribute..."
-                      className={`${INPUT_CLASS} resize-none`}
+                      error={errors.fullName}
+                    />
+                    <FormField
+                      id="join-email"
+                      name="email"
+                      type="email"
+                      label="Email address"
+                      autoComplete="email"
+                      placeholder="exampleXXXX@chitkara.edu.in"
+                      value={formData.email}
+                      onChange={handleChange}
+                      error={errors.email}
+                    />
+                    <FormField
+                      id="join-year"
+                      name="year"
+                      as="select"
+                      label="Year of study"
+                      optional
+                      value={formData.year}
+                      onChange={handleChange}
+                      error={errors.year}
+                    >
+                      {YEAR_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </FormField>
+                    <FormField
+                      id="join-branch"
+                      name="branch"
+                      label="Branch / major"
+                      placeholder="e.g. Computer Science & Eng."
+                      value={formData.branch}
+                      onChange={handleChange}
+                      error={errors.branch}
                     />
                   </div>
+                </fieldset>
 
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full group flex items-center justify-center gap-2 py-3 rounded-lg bg-accent text-bg-primary font-semibold text-sm hover:bg-accent-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {submitting ? 'Submitting…' : 'Submit Application'}
-                    <Send size={16} className="group-hover:translate-x-1 transition-transform" />
-                  </button>
+                {/* 02 Interests */}
+                <fieldset className="pt-6 border-t border-border">
+                  <legend className="eyebrow !text-text-primary mb-2 flex items-center gap-3 float-left w-full">
+                    <span className="text-text-muted">02</span> Areas of interest
+                  </legend>
+                  <p className="clear-both text-sm text-text-secondary mb-4">Select all that apply.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {INTEREST_OPTIONS.map((interest) => {
+                      const isSelected = formData.interests.includes(interest);
+                      return (
+                        <button
+                          type="button"
+                          key={interest}
+                          onClick={() => handleInterestToggle(interest)}
+                          aria-pressed={isSelected}
+                          className={`min-h-[2.75rem] px-3.5 py-2 text-sm border transition-colors duration-200 ${
+                            isSelected
+                              ? 'bg-ink text-paper border-ink'
+                              : 'bg-transparent text-text-secondary border-border-strong hover:border-ink hover:text-text-primary'
+                          }`}
+                        >
+                          {interest}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {errors.interests && <p className="mt-2 text-xs text-danger">{errors.interests}</p>}
+                </fieldset>
 
-                  <p className="text-center text-[11px] text-text-muted">
-                    No membership dues. By applying, you agree to follow our code of conduct.
+                {/* 03 Experience */}
+                <fieldset className="pt-6 border-t border-border">
+                  <legend className="eyebrow !text-text-primary mb-5 flex items-center gap-3 float-left w-full">
+                    <span className="text-text-muted">03</span> Experience
+                  </legend>
+                  <div className="clear-both grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <FormField
+                      id="join-experience"
+                      name="experience"
+                      as="select"
+                      label="Coding experience"
+                      optional
+                      value={formData.experience}
+                      onChange={handleChange}
+                      error={errors.experience}
+                    >
+                      {EXPERIENCE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </FormField>
+                    <FormField
+                      id="join-github"
+                      name="github"
+                      type="url"
+                      label="GitHub / portfolio"
+                      optional
+                      placeholder="https://github.com/username"
+                      value={formData.github}
+                      onChange={handleChange}
+                      error={errors.github}
+                    />
+                  </div>
+                  <div className="mt-5">
+                  <FormField
+                    id="join-reason"
+                    name="reason"
+                    as="textarea"
+                    rows={4}
+                    label="Why do you want to join Code2Chill?"
+                    optional
+                    placeholder="Tell us what you hope to build, learn or contribute..."
+                    value={formData.reason}
+                    onChange={handleChange}
+                    error={errors.reason}
+                  />
+                  </div>
+                </fieldset>
+
+                <div className="pt-6 border-t border-border flex flex-col sm:flex-row sm:items-center gap-5 sm:justify-between">
+                  <p className="text-xs text-text-muted max-w-xs">
+                    By applying, you agree to follow our code of conduct.
                   </p>
-                </form>
-              )}
-            </div>
-          </div>
-
-          {/* Right Column: Benefits & Community Values (5 cols) */}
-          <div className="lg:col-span-5 space-y-4 animate-stagger [--stagger-start:180ms]">
-            {/* Why Join Card */}
-            <div className="p-5 rounded-xl bg-bg-card border border-border">
-              <h3 className="text-base font-semibold text-text-primary mb-3 flex items-center gap-2">
-                <Sparkles size={18} className="text-accent" />
-                Why Join Code2Chill?
-              </h3>
-              <ul className="space-y-3 text-sm">
-                {[
-                  {
-                    title: 'Real-World Team Projects',
-                    desc: 'Collaborate with teammates on actual GitHub repositories that enhance your portfolio.',
-                  },
-                  {
-                    title: 'Hands-on Tech Workshops',
-                    desc: 'Learn industry tech stacks (React, Node, Python, Docker, AI) from senior peers.',
-                  },
-                  {
-                    title: 'Hackathon Squads',
-                    desc: 'Form teams for regional and national hackathons with like-minded coders.',
-                  },
-                  {
-                    title: 'Peer Mentorship & Code Reviews',
-                    desc: 'Receive guidance on bugs, resume building, and tech interview prep.',
-                  },
-                ].map((benefit) => (
-                  <li key={benefit.title} className="flex items-start gap-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-text-primary text-xs">{benefit.title}</p>
-                      <p className="text-text-secondary text-xs leading-relaxed">{benefit.desc}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Club Values Card */}
-            <div className="p-5 rounded-xl bg-bg-card border border-border">
-              <h3 className="text-base font-semibold text-text-primary mb-3 flex items-center gap-2">
-                <Terminal size={18} className="text-accent" />
-                Our Code of Conduct
-              </h3>
-              <div className="space-y-2.5 text-xs text-text-secondary leading-relaxed">
-                <p>
-                  <strong className="text-text-primary font-mono">&gt; Curiosity first:</strong> No question is too basic. We all started at line 1.
-                </p>
-                <p>
-                  <strong className="text-text-primary font-mono">&gt; Build openly:</strong> Share your knowledge, credit contributors, and write readable code.
-                </p>
-                <p>
-                  <strong className="text-text-primary font-mono">&gt; Inclusive community:</strong> Respect everyone regardless of skill level, background, or identity.
-                </p>
+                  <Button type="submit" disabled={submitting} className="group sm:min-w-[14rem]">
+                    {submitting ? 'Submitting…' : 'Submit application'}
+                    <ArrowRight size={16} aria-hidden="true" className="transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </div>
               </div>
-            </div>
+            </form>
+          )}
+        </section>
 
-            {/* Contact quick card */}
-            <div className="p-5 rounded-xl bg-bg-card border border-border">
-              <p className="text-xs text-text-muted mb-1 font-mono">Questions before applying?</p>
-              <p className="text-sm text-text-secondary">
-                Reach out to the Code2Chill team through the club's official channels.
-              </p>
-            </div>
-          </div>
+        {/* Side column */}
+        <aside className="lg:col-span-4 lg:col-start-9 space-y-14 animate-enter enter-delay-3">
+          <section aria-labelledby="why-join">
+            <h2 id="why-join" className="eyebrow !text-text-primary border-t border-ink pt-3 mb-6">
+              Why join Code2Chill?
+            </h2>
+            <ol className="space-y-6">
+              {BENEFITS.map((benefit, index) => (
+                <li key={benefit} className="grid grid-cols-[2rem_1fr] gap-2 items-baseline">
+                  <span className="eyebrow" aria-hidden="true">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <p className="font-display text-lg tracking-[-0.02em] text-text-primary">{benefit}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <section aria-labelledby="conduct" className="bg-sage p-6 sm:p-8">
+            <h2 id="conduct" className="eyebrow !text-ink mb-5">
+              Our code of conduct
+            </h2>
+            <dl className="space-y-4">
+              {CODE_OF_CONDUCT.map(([term, desc]) => (
+                <div key={term}>
+                  <dt className="font-display text-lg tracking-[-0.02em] text-ink">{term}</dt>
+                  <dd className="text-sm text-ink/80 leading-relaxed">{desc}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <p className="text-sm text-text-secondary border-t border-border pt-5">
+            <span className="eyebrow block mb-2">Questions before applying?</span>
+            Reach out to the Code2Chill team through the club&apos;s official channels.
+          </p>
+        </aside>
+      </div>
+
+      {/* FAQ */}
+      <section aria-labelledby="faq-heading" className="wrap mt-24 sm:mt-32">
+        <div className="rule-ink pt-3 flex items-baseline justify-between">
+          <p className="eyebrow !text-text-primary">FAQ</p>
         </div>
-      </section>
-
-      {/* FAQs Section */}
-      <section className="px-4 sm:px-6 lg:px-8 mt-12">
-        <div className="max-w-6xl mx-auto">
-          <SectionHeading
-            align="left"
-            badge="FAQ"
-            title="Frequently Asked Questions"
-            description="Common questions from aspiring members."
-          />
-
-          <div className="animate-stagger grid grid-cols-1 md:grid-cols-2 gap-4">
-            {FAQS.map((faq, index) => (
-              <div
-                key={index}
-                className="h-full p-5 rounded-xl bg-bg-card border border-border hover:border-accent/50 transition-colors duration-200"
-              >
-                <h4 className="text-sm font-semibold text-text-primary mb-2">
-                  {faq.q}
-                </h4>
-                <p className="text-xs text-text-secondary leading-relaxed">
-                  {faq.a}
-                </p>
+        <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-4">
+            <h2 id="faq-heading" className="display-md text-text-primary">
+              Frequently asked <em className="text-accent">questions</em>
+            </h2>
+            <p className="mt-4 text-text-secondary">Common questions from aspiring members.</p>
+          </div>
+          <dl className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-x-10">
+            {FAQS.map((faq) => (
+              <div key={faq.q} className="border-t border-border py-6">
+                <dt className="font-display text-xl tracking-[-0.02em] text-text-primary mb-2">{faq.q}</dt>
+                <dd className="text-sm text-text-secondary leading-relaxed">{faq.a}</dd>
               </div>
             ))}
-          </div>
+          </dl>
         </div>
       </section>
     </div>

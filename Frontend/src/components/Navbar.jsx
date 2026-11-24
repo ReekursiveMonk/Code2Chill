@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogIn, LogOut, User } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import Logo from './Logo';
 import ProfileMenu from './ProfileMenu';
+import Button from './Button';
 import { useAuth } from '../context/AuthContext';
 import { getUserInitials } from '../utils/initials';
 
@@ -36,7 +37,7 @@ function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      setScrolled(window.scrollY > 8);
     };
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -59,22 +60,19 @@ function Navbar() {
   }, [isOpen]);
 
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 px-3 sm:px-4 pt-3">
-      {/* Floating glass bar. Only colours transition; the blur stays static. */}
-      <div
-        className={`max-w-6xl mx-auto rounded-2xl border backdrop-blur-md transition-[background-color,border-color,box-shadow] duration-300 ${
-          scrolled || isOpen
-            ? 'bg-bg-secondary/85 border-border shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_12px_32px_-12px_rgba(0,0,0,0.8)]'
-            : 'bg-bg-secondary/55 border-white/[0.07] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]'
-        }`}
-      >
-        <div className="flex items-center justify-between h-16 px-4 sm:px-5">
-          {/* Logo */}
+    <nav
+      aria-label="Primary"
+      className={`fixed top-0 inset-x-0 z-50 bg-bg-primary border-b transition-colors duration-300 ${
+        scrolled || isOpen ? 'border-border' : 'border-transparent'
+      }`}
+    >
+      <div className="wrap">
+        <div className="flex items-center justify-between h-16">
           <Logo />
 
-          {/* Desktop Navigation + account */}
-          <div className="hidden md:flex items-center gap-4">
-            <div className="flex items-center gap-1">
+          {/* Desktop navigation + account */}
+          <div className="hidden md:flex items-center gap-10">
+            <div className="flex items-center gap-8">
               {visibleLinks.map((link) => {
                 const isActive = location.pathname === link.path;
                 return (
@@ -82,17 +80,14 @@ function Navbar() {
                     key={link.path}
                     to={link.path}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`relative px-3.5 py-2 rounded-lg text-sm transition-colors duration-200 ${
-                      isActive
-                        ? 'text-accent font-semibold'
-                        : 'font-medium text-text-secondary hover:text-text-primary hover:bg-white/5'
+                    className={`relative py-2 text-sm font-medium transition-colors duration-200 ${
+                      isActive ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'
                     }`}
                   >
                     {link.name}
-                    {/* Active indicator */}
                     <span
                       aria-hidden="true"
-                      className={`absolute left-3.5 right-3.5 -bottom-0.5 h-0.5 rounded-full bg-accent origin-left transition-transform duration-300 ${
+                      className={`absolute left-0 right-0 -bottom-0.5 h-0.5 bg-accent origin-left transition-transform duration-300 ${
                         isActive ? 'scale-x-100' : 'scale-x-0'
                       }`}
                     />
@@ -104,30 +99,35 @@ function Navbar() {
             {user ? (
               <ProfileMenu user={user} onLogout={handleLogout} />
             ) : isLoading ? (
-              <span className="w-[42px] h-[42px]" aria-hidden="true" />
+              <span className="w-[120px] h-10" aria-hidden="true" />
             ) : (
-              <Link
-                to="/login"
-                aria-current={isAuthPage ? 'page' : undefined}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border-2 border-accent brutal-hover ${
-                  isAuthPage
-                    ? 'bg-accent text-bg-primary brutal-shadow-light'
-                    : 'bg-bg-primary text-accent'
-                }`}
-              >
-                <LogIn size={15} aria-hidden="true" />
-                Log in
-              </Link>
+              <div className="flex items-center gap-6">
+                <Link
+                  to="/login"
+                  aria-current={location.pathname === '/login' ? 'page' : undefined}
+                  className="tap text-sm font-medium text-text-primary link-quiet"
+                >
+                  Log in
+                </Link>
+                <Button
+                  to="/signup"
+                  variant="dark"
+                  size="sm"
+                  aria-current={location.pathname === '/signup' ? 'page' : undefined}
+                >
+                  Sign up
+                </Button>
+              </div>
             )}
           </div>
 
           {/* Mobile: profile shortcut + menu button */}
-          <div className="flex items-center gap-2 md:hidden">
+          <div className="flex items-center gap-4 md:hidden">
             {user && (
               <Link
                 to="/profile"
                 aria-label="Your profile"
-                className="w-9 h-9 rounded-full bg-accent/10 border border-accent/30 flex items-center justify-center text-accent font-mono text-xs font-bold hover:border-accent transition-colors"
+                className="w-11 h-11 border border-ink flex items-center justify-center text-text-primary font-mono text-xs font-medium hover:bg-ink hover:text-paper transition-colors"
               >
                 {getUserInitials(user)}
               </Link>
@@ -135,28 +135,26 @@ function Navbar() {
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
-              className={`p-2 rounded-lg border transition-colors ${
-                isOpen
-                  ? 'border-accent/50 text-accent bg-accent/10'
-                  : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-white/5'
-              }`}
+              className="eyebrow !text-text-primary tap px-2 -mr-2"
               aria-label="Toggle menu"
               aria-expanded={isOpen}
               aria-controls="mobile-menu"
             >
-              {isOpen ? <X size={22} /> : <Menu size={22} />}
+              {isOpen ? 'Close' : 'Menu'}
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Navigation (inside the same glass bar) */}
-        <div
-          id="mobile-menu"
-          className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            isOpen ? 'max-h-[36rem] opacity-100' : 'max-h-0 opacity-0'
-          }`}
-        >
-          <div className="border-t border-border px-3 pt-2 pb-3">
+      {/* Mobile navigation: large serif links separated by hairlines */}
+      <div
+        id="mobile-menu"
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          isOpen ? 'max-h-[40rem] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="wrap pb-6">
+          <div className="rule-ink">
             {visibleLinks.map((link) => {
               const isActive = location.pathname === link.path;
               return (
@@ -165,70 +163,65 @@ function Navbar() {
                   to={link.path}
                   aria-current={isActive ? 'page' : undefined}
                   tabIndex={isOpen ? undefined : -1}
-                  className={`block px-4 py-3 rounded-lg border-l-2 text-sm font-medium transition-colors duration-200 ${
-                    isActive
-                      ? 'border-accent text-accent bg-accent/10'
-                      : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-white/5'
+                  className={`flex items-baseline justify-between py-3.5 border-b border-border display-sm ${
+                    isActive ? 'text-accent-ink' : 'text-text-primary'
                   }`}
                 >
                   {link.name}
+                  {isActive && (
+                    <span className="eyebrow" aria-hidden="true">
+                      Here
+                    </span>
+                  )}
                 </Link>
               );
             })}
+          </div>
 
-            {/* Account */}
-            <div className="mt-2 pt-2 border-t border-border">
-              {user ? (
-                <>
-                  <div className="px-4 py-2">
-                    <p className="text-sm font-semibold text-text-primary truncate">
-                      {user.name || 'Signed in'}
-                    </p>
-                    <p className="text-xs text-text-muted truncate">{user.email}</p>
-                  </div>
+          {/* Account */}
+          <div className="pt-5">
+            {user ? (
+              <>
+                <p className="text-sm font-semibold text-text-primary truncate">
+                  {user.name || 'Signed in'}
+                </p>
+                <p className="text-xs text-text-muted truncate mb-3">{user.email}</p>
+                <div className="flex gap-6">
                   <Link
                     to="/profile"
                     aria-current={location.pathname === '/profile' ? 'page' : undefined}
                     tabIndex={isOpen ? undefined : -1}
-                    className={`flex items-center gap-2 px-4 py-3 rounded-lg border-l-2 text-sm font-medium transition-colors duration-200 ${
-                      location.pathname === '/profile'
-                        ? 'border-accent text-accent bg-accent/10'
-                        : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-white/5'
-                    }`}
+                    className="tap gap-2 text-sm font-medium text-text-primary link-quiet"
                   >
-                    <User size={16} aria-hidden="true" />
+                    <User size={15} aria-hidden="true" />
                     View profile
                   </Link>
                   <button
                     type="button"
                     onClick={handleLogout}
                     tabIndex={isOpen ? undefined : -1}
-                    className="w-full flex items-center gap-2 px-4 py-3 rounded-lg border-l-2 border-transparent text-sm font-medium text-text-secondary hover:text-red-400 hover:bg-red-400/5 transition-colors duration-200"
+                    className="tap gap-2 text-sm font-medium text-text-secondary link-quiet"
                   >
-                    <LogOut size={16} aria-hidden="true" />
+                    <LogOut size={15} aria-hidden="true" />
                     Log out
                   </button>
-                </>
-              ) : isLoading ? null : (
-                <div className="grid grid-cols-2 gap-3 pt-2 pb-1 px-1">
-                  <Link
-                    to="/login"
-                    tabIndex={isOpen ? undefined : -1}
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-accent text-sm font-semibold text-accent bg-bg-primary brutal-hover"
-                  >
-                    <LogIn size={16} aria-hidden="true" />
-                    Log in
-                  </Link>
-                  <Link
-                    to="/signup"
-                    tabIndex={isOpen ? undefined : -1}
-                    className="flex items-center justify-center px-4 py-2.5 rounded-lg border-2 border-accent bg-accent text-bg-primary text-sm font-semibold brutal-hover brutal-shadow-light"
-                  >
-                    Sign up
-                  </Link>
                 </div>
-              )}
-            </div>
+              </>
+            ) : isLoading ? null : (
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  to="/login"
+                  variant="outline"
+                  tabIndex={isOpen ? undefined : -1}
+                  aria-current={isAuthPage && location.pathname === '/login' ? 'page' : undefined}
+                >
+                  Log in
+                </Button>
+                <Button to="/signup" variant="dark" tabIndex={isOpen ? undefined : -1}>
+                  Sign up
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

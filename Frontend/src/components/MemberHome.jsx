@@ -1,71 +1,33 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, LogOut } from 'lucide-react';
+import Button from './Button';
+import ArrowLink from './ArrowLink';
 import {
-  ArrowRight,
-  Calendar,
-  CalendarDays,
-  Rocket,
-  ShieldCheck,
-  User,
-  Users,
-} from 'lucide-react';
+  ApiBlock,
+  EventListings,
+  INSTAGRAM_HANDLE,
+  INSTAGRAM_URL,
+  ProjectSpread,
+  SectionLabel,
+} from './HomeSections';
+import { useAuth } from '../context/AuthContext';
+import { useApiData } from '../hooks/useApiData';
+import { getEvents, getProjects, getTeam } from '../services/api';
+import { getUserInitials } from '../utils/initials';
 
 /**
- * Home page for signed-in users. Everything personal comes from the
- * authenticated user returned by /api/auth/me (name, role, createdAt).
- * No statistics are invented.
+ * Home page for signed-in users: a personal "member edition".
+ *
+ * Everything personal comes from the authenticated user returned by the API
+ * (name, email, role, createdAt). Events, projects and team come from the
+ * public API. No statistics or activity are invented.
  */
 
-const container = 'max-w-6xl mx-auto';
-
-const ACTIONS = [
-  {
-    to: '/events',
-    icon: Calendar,
-    title: 'Explore Events',
-    text: 'See upcoming hackathons, workshops and meetups.',
-  },
-  {
-    to: '/projects',
-    icon: Rocket,
-    title: 'Explore Projects',
-    text: 'Browse what members are building and find one to join.',
-  },
-  {
-    to: '/team',
-    icon: Users,
-    title: 'Meet the Team',
-    text: 'Get to know the people who run Code2Chill.',
-  },
-  {
-    to: '/profile',
-    icon: User,
-    title: 'My Profile',
-    text: 'View your account details and manage your session.',
-  },
-];
-
-const JOURNEY = [
-  {
-    step: '01',
-    title: 'Pick an event',
-    text: 'Start with a workshop or meetup that matches what you want to learn.',
-    to: '/events',
-    cta: 'Browse events',
-  },
-  {
-    step: '02',
-    title: 'Find a project',
-    text: 'Look through club projects and pick one to read, try or contribute to.',
-    to: '/projects',
-    cta: 'Browse projects',
-  },
-  {
-    step: '03',
-    title: 'Connect with the team',
-    text: 'Reach out to the leads and core team for guidance on where to begin.',
-    to: '/team',
-    cta: 'Meet the team',
-  },
+const QUICK_LINKS = [
+  { to: '/events', title: 'Events', text: 'Workshops, talks, hackathons and meetups.' },
+  { to: '/projects', title: 'Projects', text: 'What members are building, and where to contribute.' },
+  { to: '/team', title: 'Team', text: 'The leads and core team who run the club.' },
+  { to: '/profile', title: 'Your profile', text: 'Your account details and session.' },
 ];
 
 export function getFirstName(user) {
@@ -80,139 +42,244 @@ function formatDate(value) {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-function MemberHome({ user }) {
-  const firstName = getFirstName(user);
+function greetingFor(date) {
+  const hour = date.getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+/* ───────── Membership card (sidebar) ───────── */
+function MembershipCard({ user, onLogout }) {
   const memberSince = formatDate(user.createdAt);
   const role = user.role === 'admin' ? 'Admin' : 'Member';
 
   return (
-    <div className="pt-28 pb-14 px-4 sm:px-6 lg:px-8 lg:pt-32">
-      <div className={container}>
-        {/* Greeting */}
-        <header className="animate-enter mb-10">
-          <span className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-md border border-accent/50 text-accent text-[11px] font-mono font-bold uppercase tracking-[0.18em]">
-            <span className="w-1.5 h-1.5 bg-accent-2" aria-hidden="true" />
-            Your Dashboard
-          </span>
-          <h1 className="font-bold tracking-[-0.03em] text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.05] text-text-primary break-words">
-            Welcome back{firstName ? ', ' : ''}
-            {firstName && <span className="text-accent">{firstName}</span>}!
-          </h1>
-          <p className="mt-4 max-w-2xl text-text-secondary text-base sm:text-lg leading-relaxed">
-            Code2Chill is a community of students who learn by building together.
-            Find an event, pick up a project or say hello to the team — there&apos;s
-            always something to get involved in.
-          </p>
-        </header>
-
-        {/* Quick actions */}
-        <section aria-labelledby="member-actions" className="mb-12">
-          <h2 id="member-actions" className="sr-only">
-            Quick links
+    <aside aria-labelledby="membership-heading" className="bg-sage text-ink">
+      <div className="p-6 sm:p-8">
+        <div className="flex items-start justify-between gap-4 mb-8">
+          <h2 id="membership-heading" className="eyebrow !text-ink">
+            Your membership
           </h2>
-          <ul className="animate-stagger grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {ACTIONS.map((action) => (
-              <li key={action.to} className="h-full">
-                <Link
-                  to={action.to}
-                  className="group flex h-full flex-col gap-4 rounded-xl border border-border bg-bg-card p-5 transition-colors duration-200 hover:border-accent/60 focus-visible:border-accent"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                      <action.icon size={20} className="text-accent" aria-hidden="true" />
+          <span
+            aria-hidden="true"
+            className="w-12 h-12 shrink-0 bg-ink text-paper flex items-center justify-center font-mono text-sm"
+          >
+            {getUserInitials(user)}
+          </span>
+        </div>
+
+        <p className="font-display text-3xl tracking-[-0.03em] leading-tight break-words">{user.name}</p>
+        <p className="text-sm text-ink/80 break-all mt-1">{user.email}</p>
+
+        <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-ink/25 pt-5">
+          <div>
+            <dt className="eyebrow !text-ink/75 mb-1">Role</dt>
+            <dd className="text-sm font-semibold">{role}</dd>
+          </div>
+          {memberSince && (
+            <div>
+              <dt className="eyebrow !text-ink/75 mb-1">Joined</dt>
+              <dd className="text-sm font-semibold">{memberSince}</dd>
+            </div>
+          )}
+        </dl>
+
+        <p className="mt-8 border-t border-ink/25 pt-5 text-sm leading-relaxed text-ink/85">
+          <span className="eyebrow !text-ink/75 block mb-2">Club application</span>
+          Join Us applications are reviewed by the club admins. Their status isn&apos;t shown in your
+          account yet.
+        </p>
+
+        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <Button to="/profile" variant="dark" size="sm">
+            View profile
+          </Button>
+          <button
+            type="button"
+            onClick={onLogout}
+            className="tap gap-2 text-sm font-medium link-quiet"
+          >
+            <LogOut size={14} aria-hidden="true" />
+            Log out
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+/* ───────── Team list + announcements (sidebar on desktop) ───────── */
+function SidebarExtras({ team }) {
+  const teamCount = team.data?.count;
+  return (
+    <>
+      <div className="border-t border-ink pt-4">
+        <p className="eyebrow mb-3">The team</p>
+        {team.loading ? (
+          <p className="text-sm text-text-muted">Loading…</p>
+        ) : team.error ? (
+          <p className="text-sm text-text-secondary">Team list unavailable right now.</p>
+        ) : (
+          <>
+            <ul className="space-y-1.5">
+              {[...(team.data?.leads || []), ...(team.data?.core || [])].map((member) => (
+                <li key={member.id} className="flex items-baseline justify-between gap-4 text-sm">
+                  <span className="text-text-primary">{member.name}</span>
+                  <span className="text-text-muted text-xs">{member.role}</span>
+                </li>
+              ))}
+            </ul>
+            {teamCount != null && (
+              <p className="mt-4 text-xs text-text-muted">
+                {teamCount} {teamCount === 1 ? 'person' : 'people'} on the team
+              </p>
+            )}
+          </>
+        )}
+      </div>
+
+      <div className="border-t border-ink pt-4">
+        <p className="eyebrow mb-2">Announcements</p>
+        <a
+          href={INSTAGRAM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="tap font-display text-xl tracking-[-0.02em] link-quiet"
+        >
+          {INSTAGRAM_HANDLE}
+        </a>
+      </div>
+    </>
+  );
+}
+
+/* ───────── Member Home ───────── */
+function MemberHome({ user }) {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const events = useApiData(getEvents);
+  const projects = useApiData(getProjects);
+  const team = useApiData(getTeam);
+
+  const now = new Date();
+  const firstName = getFirstName(user);
+  const today = now.toLocaleDateString(undefined, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const handleLogout = () => {
+    logout();
+    navigate('/', { replace: true });
+  };
+
+  return (
+    <div className="pt-24 sm:pt-28 pb-20 sm:pb-28">
+      {/* Masthead */}
+      <header className="wrap">
+        <div className="rule-ink pt-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 animate-enter">
+          <p className="eyebrow !text-text-primary">Member edition</p>
+          <p className="eyebrow">{today}</p>
+        </div>
+
+        <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-end">
+          <h1 className="lg:col-span-9 display-lg text-text-primary break-words animate-enter enter-delay-1">
+            {greetingFor(now)}
+            {firstName ? ',' : '.'}
+            {firstName && (
+              <>
+                <br />
+                <em className="text-accent">{firstName}.</em>
+              </>
+            )}
+          </h1>
+          <p className="lg:col-span-3 text-text-secondary leading-relaxed animate-enter enter-delay-2">
+            Here&apos;s what&apos;s happening at Code2Chill — find an event, pick up a project or say hello
+            to the team.
+          </p>
+        </div>
+      </header>
+
+      {/* Body: main column + sidebar */}
+      <div className="wrap mt-16 sm:mt-20 grid grid-cols-1 lg:grid-cols-12 gap-14 lg:gap-12">
+        <div className="lg:col-span-8 order-2 lg:order-1 space-y-20 sm:space-y-24">
+          {/* Quick links */}
+          <section aria-labelledby="quick-links">
+            <SectionLabel number="01">
+              <span id="quick-links">Where to next</span>
+            </SectionLabel>
+            <ul className="mt-2">
+              {QUICK_LINKS.map((link, index) => (
+                <li key={link.to} className="border-b border-border">
+                  <Link
+                    to={link.to}
+                    className="group grid grid-cols-[2.5rem_1fr_auto] sm:grid-cols-[3.5rem_14rem_1fr_auto] items-baseline gap-x-4 py-5"
+                  >
+                    <span className="eyebrow" aria-hidden="true">
+                      {String(index + 1).padStart(2, '0')}
                     </span>
+                    <span className="font-display text-2xl sm:text-3xl tracking-[-0.03em] text-text-primary transition-colors group-hover:text-accent-ink">
+                      {link.title}
+                    </span>
+                    <span className="hidden sm:block text-sm text-text-secondary">{link.text}</span>
                     <ArrowRight
                       size={18}
                       aria-hidden="true"
-                      className="text-text-muted transition-[transform,color] duration-200 group-hover:translate-x-1 group-hover:text-accent"
+                      className="text-text-muted transition-[transform,color] duration-200 group-hover:translate-x-1 group-hover:text-accent-ink"
                     />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-text-primary mb-1">{action.title}</h3>
-                    <p className="text-sm text-text-secondary leading-snug">{action.text}</p>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* Developer journey */}
-        <section aria-labelledby="member-journey" className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2 animate-enter enter-delay-2 rounded-xl border border-border bg-bg-card p-5 sm:p-6">
-            <h2 id="member-journey" className="text-xl sm:text-2xl font-bold text-text-primary mb-1">
-              Your Developer Journey
-            </h2>
-            <p className="text-sm text-text-secondary mb-5">
-              Not sure where to start? Here&apos;s a simple path through the club.
-            </p>
-            <ol className="space-y-3">
-              {JOURNEY.map((item) => (
-                <li
-                  key={item.step}
-                  className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-lg border border-border bg-bg-primary p-4"
-                >
-                  <span className="font-mono text-sm font-bold text-accent shrink-0" aria-hidden="true">
-                    {item.step}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-bold text-text-primary">{item.title}</h3>
-                    <p className="text-sm text-text-secondary leading-snug">{item.text}</p>
-                  </div>
-                  <Link
-                    to={item.to}
-                    className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline"
-                  >
-                    {item.cta}
-                    <ArrowRight size={14} aria-hidden="true" />
                   </Link>
                 </li>
               ))}
-            </ol>
-          </div>
+            </ul>
+          </section>
 
-          {/* Account summary: real fields only */}
-          <aside
-            aria-label="Your account"
-            className="animate-enter enter-delay-3 rounded-xl border border-border bg-bg-card p-5 sm:p-6"
-          >
-            <h2 className="text-sm font-mono font-bold uppercase tracking-[0.18em] text-text-muted mb-4">
-              Your account
-            </h2>
-            <dl className="space-y-4">
-              <div className="flex items-start gap-3">
-                <User size={16} className="text-accent mt-0.5 shrink-0" aria-hidden="true" />
-                <div className="min-w-0">
-                  <dt className="text-xs font-mono text-text-muted">Name</dt>
-                  <dd className="text-sm text-text-primary break-words">{user.name}</dd>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <ShieldCheck size={16} className="text-accent mt-0.5 shrink-0" aria-hidden="true" />
-                <div>
-                  <dt className="text-xs font-mono text-text-muted">Role</dt>
-                  <dd className="text-sm text-text-primary">{role}</dd>
-                </div>
-              </div>
-              {memberSince && (
-                <div className="flex items-start gap-3">
-                  <CalendarDays size={16} className="text-accent mt-0.5 shrink-0" aria-hidden="true" />
-                  <div>
-                    <dt className="text-xs font-mono text-text-muted">Member since</dt>
-                    <dd className="text-sm text-text-primary">{memberSince}</dd>
-                  </div>
-                </div>
-              )}
-            </dl>
-            <Link
-              to="/profile"
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-semibold text-text-primary transition-colors duration-200 hover:border-accent hover:text-accent"
-            >
-              View full profile
-              <ArrowRight size={16} aria-hidden="true" />
-            </Link>
-          </aside>
-        </section>
+          {/* Events */}
+          <section aria-labelledby="member-events">
+            <SectionLabel number="02">Events</SectionLabel>
+            <div className="mt-8 mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <h2 id="member-events" className="display-md text-text-primary">
+                Coming <em className="text-accent">up</em>
+              </h2>
+              <ArrowLink to="/events">All events</ArrowLink>
+            </div>
+            <ApiBlock query={events} loadingLabel="Loading events…">
+              {(data) => <EventListings events={data?.events} limit={3} />}
+            </ApiBlock>
+          </section>
+
+          {/* Projects */}
+          <section aria-labelledby="member-projects">
+            <SectionLabel number="03">Projects</SectionLabel>
+            <div className="mt-8 mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <h2 id="member-projects" className="display-md text-text-primary">
+                Projects to <em className="text-accent">explore</em>
+              </h2>
+              <ArrowLink to="/projects">All projects</ArrowLink>
+            </div>
+            <ApiBlock query={projects} loadingLabel="Loading projects…">
+              {(data) => <ProjectSpread projects={data?.projects} limit={3} />}
+            </ApiBlock>
+          </section>
+
+          {/* On small screens the team and announcements come last */}
+          <div className="lg:hidden space-y-10">
+            <SidebarExtras team={team} />
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="lg:col-span-4 order-1 lg:order-2">
+          <div className="lg:sticky lg:top-24 space-y-10 animate-enter enter-delay-2">
+            <MembershipCard user={user} onLogout={handleLogout} />
+
+            <div className="hidden lg:block space-y-10">
+              <SidebarExtras team={team} />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

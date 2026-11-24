@@ -1,190 +1,230 @@
 import { useState } from 'react';
-import {
-  ExternalLink,
-  Star,
-  GitFork,
-  Code2,
-  Filter,
-} from 'lucide-react';
-import SectionHeading from '../components/SectionHeading';
+import { ArrowUpRight } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import FilterGroup from '../components/FilterGroup';
+import Button from '../components/Button';
 import { GithubIcon } from '../components/BrandIcons';
-import { LoadingState, ErrorState, EmptyState, SampleBadge } from '../components/DataState';
-import { useApiData } from '../hooks/useApiData';
+import { LoadingState, ErrorState, SampleBadge } from '../components/DataState';
+import { useApiData, WAKING_LABEL } from '../hooks/useApiData';
 import { getProjects } from '../services/api';
 
 const CATEGORIES = ['All', 'Web', 'Mobile', 'AI/ML', 'CLI Tool'];
+const PROPOSE_URL = 'https://github.com/CodeWithPrinceX/Code2Chill/issues';
 
-function ProjectCard({ project }) {
+const hasLink = (url) => Boolean(url) && url !== '#';
+
+/* ───────── Shared bits ───────── */
+
+function ProjectMeta({ project }) {
   return (
-    <div className="group flex h-full flex-col p-5 rounded-xl bg-bg-card border border-border hover:border-accent/50 transition-colors duration-200">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono font-medium text-accent bg-accent/10 border border-accent/20">
-              {project.category}
-            </span>
-            {project.isSample && <SampleBadge />}
-          </div>
-          <h3 className="text-lg font-semibold text-text-primary group-hover:text-accent transition-colors">
-            {project.title}
-          </h3>
-        </div>
-      </div>
-
-      {/* Description */}
-      <p className="text-text-secondary text-sm leading-relaxed mb-4 flex-1">
-        {project.description}
-      </p>
-
-      {/* Tech Stack */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {project.tech.map((t) => (
-          <span
-            key={t}
-            className="px-2 py-1 rounded-md text-xs font-mono text-text-muted bg-bg-primary border border-border"
-          >
-            {t}
-          </span>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-border">
-        {/* Stats */}
-        <div className="flex items-center gap-4 text-xs text-text-muted">
-          {project.stars != null && (
-            <span className="flex items-center gap-1">
-              <Star size={12} aria-hidden="true" /> {project.stars}
-              <span className="sr-only">stars</span>
-            </span>
-          )}
-          {project.forks != null && (
-            <span className="flex items-center gap-1">
-              <GitFork size={12} aria-hidden="true" /> {project.forks}
-              <span className="sr-only">forks</span>
-            </span>
-          )}
-        </div>
-
-        {/* Links */}
-        <div className="flex items-center gap-2">
-          {project.github && project.github !== '#' && (
-            <a
-              href={project.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-1.5 rounded-md text-text-muted hover:text-accent hover:bg-accent/10 transition-all"
-              aria-label="View on GitHub"
-            >
-              <GithubIcon size={16} />
-            </a>
-          )}
-          {project.live && project.live !== '#' && (
-            <a
-              href={project.live}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-1.5 rounded-md text-text-muted hover:text-accent hover:bg-accent/10 transition-all"
-              aria-label="View live demo"
-            >
-              <ExternalLink size={16} />
-            </a>
-          )}
-        </div>
-      </div>
+    <div className="flex flex-wrap items-center gap-3">
+      <span className="eyebrow !text-accent-ink">{project.category}</span>
+      {project.isSample && <SampleBadge />}
     </div>
   );
 }
 
-function Projects() {
-  const [selectedCategory, setSelectedCategory] = useState('All');
-
-  const { data, loading, error, retry } = useApiData(getProjects);
-  const projects = data?.projects || [];
-
-  const filteredProjects = projects.filter(
-    (p) => selectedCategory === 'All' || p.category === selectedCategory
+function TechTags({ tech = [] }) {
+  if (!tech.length) return null;
+  return (
+    <ul className="flex flex-wrap gap-2" aria-label="Technologies">
+      {tech.map((t) => (
+        <li key={t} className="px-2.5 py-1 border border-border font-mono text-xs text-text-secondary">
+          {t}
+        </li>
+      ))}
+    </ul>
   );
+}
+
+/** GitHub stats, shown only when the API actually has a value. */
+function ProjectStats({ project }) {
+  const stats = [
+    ['Stars', project.stars],
+    ['Forks', project.forks],
+    ['Contributors', project.contributors],
+  ].filter(([, value]) => value != null);
+  if (stats.length === 0) return null;
 
   return (
-    <div className="pt-24 pb-14">
-      {/* Header */}
-      <section className="px-4 sm:px-6 lg:px-8 mb-8">
-        <div className="max-w-6xl mx-auto">
-          <SectionHeading
-            badge="Projects"
-            title="Student Projects"
-            description="Projects built by Code2Chill members. From web apps and mobile tools to AI experiments and CLI utilities."
-          />
-
-          {/* Category Filter */}
-          <div className="animate-enter enter-delay-1 flex items-center gap-2 justify-center flex-wrap">
-            <Filter size={14} className="text-text-muted" />
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
-                  selectedCategory === cat
-                    ? 'bg-accent/10 text-accent border border-accent/20'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+    <dl className="flex gap-8">
+      {stats.map(([label, value]) => (
+        <div key={label}>
+          <dt className="eyebrow mb-1">{label}</dt>
+          <dd className="font-display text-2xl tracking-[-0.02em] text-text-primary">{value}</dd>
         </div>
-      </section>
+      ))}
+    </dl>
+  );
+}
 
-      {/* Projects Grid */}
-      <section className="px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
+function ProjectLinks({ project }) {
+  const github = hasLink(project.github);
+  const live = hasLink(project.live);
+  if (!github && !live) return null;
+
+  return (
+    <div className="flex flex-wrap gap-6">
+      {github && (
+        <a
+          href={project.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="tap gap-2 text-sm font-medium link-quiet"
+        >
+          <GithubIcon size={15} />
+          Source code
+          <span className="sr-only">for {project.title} on GitHub</span>
+        </a>
+      )}
+      {live && (
+        <a
+          href={project.live}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="tap gap-1.5 text-sm font-medium link-quiet"
+        >
+          Live site
+          <span className="sr-only">for {project.title}</span>
+          <ArrowUpRight size={14} aria-hidden="true" />
+        </a>
+      )}
+    </div>
+  );
+}
+
+/* ───────── Featured project: asymmetric 7/5 spread ───────── */
+
+function FeaturedProject({ project }) {
+  return (
+    <article className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 animate-enter">
+      <div className="lg:col-span-7 bg-sage aspect-[2/1] lg:aspect-auto lg:min-h-[26rem] flex flex-col justify-between p-6 sm:p-10">
+        <p className="eyebrow !text-ink">Featured project</p>
+        <h2 className="font-display text-[clamp(2.5rem,6vw,5rem)] leading-[0.9] tracking-[-0.045em] text-ink">
+          {project.title}
+        </h2>
+      </div>
+
+      <div className="lg:col-span-5 flex flex-col gap-6 lg:py-2">
+        <ProjectMeta project={project} />
+        <p className="text-lg leading-relaxed text-text-secondary">{project.description}</p>
+        <TechTags tech={project.tech} />
+        <ProjectStats project={project} />
+        <ProjectLinks project={project} />
+      </div>
+    </article>
+  );
+}
+
+/* ───────── Index entry ───────── */
+
+function ProjectEntry({ project, number }) {
+  return (
+    <article className="h-full border-t border-ink pt-5 flex flex-col gap-4">
+      <div className="flex items-baseline justify-between gap-4">
+        <ProjectMeta project={project} />
+        <span className="eyebrow" aria-hidden="true">
+          {number}
+        </span>
+      </div>
+      <h3 className="display-sm text-text-primary">{project.title}</h3>
+      <p className="text-sm leading-relaxed text-text-secondary">{project.description}</p>
+      <TechTags tech={project.tech} />
+      <ProjectStats project={project} />
+      <ProjectLinks project={project} />
+    </article>
+  );
+}
+
+/* ───────── Page ───────── */
+
+function Projects() {
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const { data, loading, waking, error, retry } = useApiData(getProjects);
+  const projects = data?.projects || [];
+
+  const filteredProjects = projects.filter((p) => selectedCategory === 'All' || p.category === selectedCategory);
+  // The API lists real projects before samples, so the first one is featured.
+  const [featured, ...others] = filteredProjects;
+
+  return (
+    <div className="pb-20 sm:pb-28">
+      <PageHeader
+        eyebrow="Projects"
+        index="03"
+        title={
+          <>
+            Built by <em className="text-accent">members</em>
+          </>
+        }
+        intro="Projects built by Code2Chill members. From web apps and mobile tools to AI experiments and CLI utilities."
+      />
+
+      <div className="wrap">
+        <div className="animate-enter enter-delay-2 border-y border-border py-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <FilterGroup label="Category" options={CATEGORIES} value={selectedCategory} onChange={setSelectedCategory} />
+          {!loading && !error && (
+            <p className="eyebrow lg:text-right" aria-live="polite">
+              Showing {filteredProjects.length} of {projects.length}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-14 sm:mt-16">
           {loading ? (
-            <LoadingState label="Loading projects…" />
+            <LoadingState label={waking ? WAKING_LABEL : 'Loading projects…'} />
           ) : error ? (
             <ErrorState message={error.message} onRetry={retry} />
           ) : projects.length === 0 ? (
-            <EmptyState icon={Code2} message="No projects have been added yet." />
-          ) : filteredProjects.length > 0 ? (
-            <div className="animate-stagger grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
+            <p className="py-12 display-sm text-text-primary">No projects have been added yet.</p>
+          ) : !featured ? (
+            <div className="py-12 max-w-xl animate-enter">
+              <p className="display-sm text-text-primary mb-6">No projects in this category yet.</p>
+              <button type="button" onClick={() => setSelectedCategory('All')} className="btn btn-outline btn-sm">
+                Show all projects
+              </button>
             </div>
           ) : (
-            <div className="animate-enter text-center py-12">
-              <Code2 size={40} className="text-text-muted mx-auto mb-4" />
-              <p className="text-text-secondary text-sm">
-                No projects found for this category.
-              </p>
-            </div>
+            <>
+              <FeaturedProject project={featured} />
+
+              {others.length > 0 && (
+                <div className="mt-20 sm:mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-x-10 gap-y-14">
+                  {others.map((project, index) => (
+                    <div
+                      key={project.id}
+                      // Asymmetric rhythm: alternate wide/narrow columns, and drop every
+                      // second entry a little lower on large screens.
+                      className={`${index % 2 === 0 ? 'lg:col-span-7' : 'lg:col-span-5 lg:mt-16'}`}
+                    >
+                      <ProjectEntry project={project} number={String(index + 2).padStart(2, '0')} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
-      </section>
+      </div>
 
-      {/* Contribute CTA */}
-      <section className="px-4 sm:px-6 lg:px-8 mt-12">
-        <div className="max-w-3xl mx-auto">
-          <div className="animate-enter enter-delay-3 p-5 sm:p-6 rounded-xl bg-bg-card border border-border text-center">
-            <h3 className="text-xl font-semibold text-text-primary mb-2">
-              Have a project idea?
-            </h3>
-            <p className="text-text-secondary text-sm mb-5">
-              We're always looking for new projects to build together.
-              Pitch your idea and find collaborators within the club.
+      {/* Contribute */}
+      <section className="wrap mt-24 sm:mt-32">
+        <div className="bg-ink text-paper p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+          <div className="lg:col-span-8">
+            <p className="eyebrow !text-paper/70 mb-4">Contribute</p>
+            <h2 className="display-md text-paper">
+              Have a project <em className="text-accent">idea?</em>
+            </h2>
+            <p className="mt-4 text-paper/80 max-w-xl leading-relaxed">
+              We&apos;re always looking for new projects to build together. Pitch your idea and find collaborators
+              within the club.
             </p>
-            <a
-              href="https://github.com/CodeWithPrinceX/Code2Chill/issues"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-bg-primary font-semibold text-sm
-                         hover:bg-accent-2 transition-all duration-200"
-            >
+          </div>
+          <div className="lg:col-span-4 lg:text-right">
+            <Button href={PROPOSE_URL} target="_blank" rel="noopener noreferrer">
               <GithubIcon size={16} />
               Propose on GitHub
-            </a>
+            </Button>
           </div>
         </div>
       </section>

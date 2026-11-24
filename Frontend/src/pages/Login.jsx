@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { LogIn } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import AuthLayout from '../components/AuthLayout';
 import FormField from '../components/FormField';
 import { FormAlert, PageLoading } from '../components/DataState';
@@ -68,13 +68,22 @@ function Login() {
 
   return (
     <AuthLayout
-      badge="Welcome back"
-      title="Log in to Code2Chill"
-      subtitle="Pick up where you left off."
+      badge="Log in"
+      title={
+        <>
+          Welcome <em className="text-accent">back.</em>
+        </>
+      }
+      subtitle="Log in to Code2Chill and pick up where you left off."
+      aside={
+        <p className="text-sm text-text-muted max-w-sm leading-relaxed">
+          Your session stays in this browser tab only, and ends when you log out or close the tab.
+        </p>
+      }
       footer={
         <>
           New here?{' '}
-          <Link to="/signup" className="text-accent font-medium hover:underline">
+          <Link to="/signup" className="font-semibold text-text-primary link-quiet">
             Create an account
           </Link>
         </>
@@ -108,10 +117,10 @@ function Login() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full group flex items-center justify-center gap-2 py-3 rounded-lg bg-accent text-bg-primary font-semibold text-sm hover:bg-accent-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="btn btn-dark w-full group"
         >
           {submitting ? 'Logging in…' : 'Log In'}
-          <LogIn size={16} className="group-hover:translate-x-1 transition-transform" />
+          <ArrowRight size={16} aria-hidden="true" className="transition-transform group-hover:translate-x-1" />
         </button>
       </form>
     </AuthLayout>

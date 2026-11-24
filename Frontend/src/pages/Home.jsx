@@ -1,158 +1,93 @@
 import { Link } from 'react-router-dom';
-import {
-  Code2,
-  Users,
-  Calendar,
-  Rocket,
-  ArrowRight,
-  ArrowUpRight,
-  Terminal,
-  Globe,
-  Zap,
-  BookOpen,
-  Trophy,
-} from 'lucide-react';
-import SectionHeading from '../components/SectionHeading';
-import Reveal from '../components/Reveal';
-import HeroCanvas from '../components/HeroCanvas';
+import { ArrowRight } from 'lucide-react';
+import Button from '../components/Button';
+import ArrowLink from '../components/ArrowLink';
 import MemberHome from '../components/MemberHome';
 import { PageLoading } from '../components/DataState';
+import {
+  ApiBlock,
+  EventListings,
+  INSTAGRAM_HANDLE,
+  INSTAGRAM_URL,
+  ProjectSpread,
+  SectionLabel,
+  TeamRoster,
+} from '../components/HomeSections';
+import { InstagramIcon } from '../components/BrandIcons';
 import { useAuth } from '../context/AuthContext';
-import { OTHER_STATS } from '../data/stats';
 import { useApiData } from '../hooks/useApiData';
-import { getTeam } from '../services/api';
+import { getEvents, getProjects, getTeam } from '../services/api';
 
-/* Shared styles */
-const container = 'max-w-6xl mx-auto';
-const section = 'py-12 sm:py-16 px-4 sm:px-6 lg:px-8';
-const card = 'h-full rounded-xl border border-border bg-bg-card p-5';
+/*
+ * Public home page (logged out): a "cover story" layout.
+ * Oversized headline, asymmetric grids, numbered sections, real data only.
+ */
 
-const primaryButton =
-  'group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-accent text-bg-primary font-display font-bold text-base ' +
-  'shadow-[4px_4px_0_0_var(--color-text-primary)] transition-[transform,box-shadow] duration-150 ' +
-  'hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_var(--color-text-primary)] ' +
-  'active:translate-x-0 active:translate-y-0 active:shadow-none';
+const CONTENTS = [
+  { number: '01', label: 'About', href: '#about' },
+  { number: '02', label: 'Events', href: '#events' },
+  { number: '03', label: 'Projects', href: '#projects' },
+  { number: '04', label: 'Team', href: '#team' },
+];
 
-const secondaryButton =
-  'group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-border text-text-primary font-display font-bold text-base ' +
-  'transition-colors duration-200 hover:border-accent hover:text-accent';
+const ACTIVITIES = [
+  { title: 'Coding Sessions', text: 'Solve problems and build projects together.' },
+  { title: 'Tech Events', text: 'Explore hackathons, tech talks and community events.' },
+  { title: 'Workshops', text: 'Learn practical skills through hands-on sessions.' },
+  { title: 'Mentorship', text: 'Get guidance on projects and technical growth.' },
+  { title: 'Open Source', text: 'Contribute to projects that solve real problems.' },
+  { title: 'Competitions', text: 'Participate in coding contests and hackathons.' },
+];
 
-/* ───────── Hero ───────── */
-function Hero() {
+/* ───────── Cover ───────── */
+function Cover() {
   return (
-    <section className="px-4 sm:px-6 lg:px-8 pt-28 pb-10 lg:pt-32 lg:pb-12">
-      <div className={`${container} grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center`}>
-        {/* Left: heading, description, buttons */}
-        <div className="lg:col-span-7">
-          <div className="animate-fade-in-up flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
-            <span className="inline-flex items-center px-3 py-1.5 rounded-md border border-text-primary/70 text-text-primary font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.25em]">
-              Chitkara University
-            </span>
-            <span className="inline-flex items-center gap-2 text-xs font-mono font-medium text-accent uppercase tracking-widest">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-2" aria-hidden="true" />
-              University Coding Club
-            </span>
-          </div>
+    <section className="pt-24 sm:pt-28">
+      <div className="wrap">
+        <div className="rule-ink pt-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 animate-enter">
+          <p className="eyebrow !text-text-primary">Chitkara University · Coding Club</p>
+          <p className="eyebrow hidden sm:block">Programmers · Developers · AI enthusiasts</p>
+        </div>
 
-          <h1 className="animate-fade-in-up animate-delay-100 font-bold leading-[0.95] tracking-[-0.045em] text-[clamp(3rem,8vw,6rem)] mb-6">
-            <span className="block text-text-primary">Build.</span>{' '}
-            <span className="block text-accent">Connect.</span>{' '}
-            <span className="block text-outline">Innovate.</span>
-          </h1>
+        <h1 className="display-xl text-text-primary mt-10 sm:mt-16 lg:mt-20">
+          <span className="block animate-enter enter-delay-1">Build.</span>
+          <span className="block sm:pl-[12%] animate-enter enter-delay-2">Connect.</span>
+          <span className="block sm:pl-[28%] italic text-accent animate-enter enter-delay-3">Innovate.</span>
+        </h1>
 
-          <p className="animate-fade-in-up animate-delay-200 max-w-xl text-text-secondary text-base sm:text-lg leading-relaxed mb-8">
-            A student-led technical community bringing together programmers,
-            developers and AI enthusiasts. Explore, build and grow — beyond the
-            classroom.
+        <div className="mt-12 sm:mt-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-end">
+          <p className="lg:col-span-5 lg:col-start-1 lede animate-enter enter-delay-3">
+            A student-led technical community bringing together programmers, developers and AI
+            enthusiasts. Explore, build and grow — beyond the classroom.
           </p>
-
-          <div className="animate-fade-in-up animate-delay-300 flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <Link to="/join" className={primaryButton}>
+          <div className="lg:col-span-4 lg:col-start-9 flex flex-wrap items-center gap-x-8 gap-y-4 lg:justify-end animate-enter enter-delay-3">
+            <Button to="/join">
               Join the Club
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link to="/projects" className={secondaryButton}>
-              View Projects
-              <ArrowUpRight size={18} />
-            </Link>
+              <ArrowRight size={16} aria-hidden="true" />
+            </Button>
+            <ArrowLink to="/projects">View Projects</ArrowLink>
           </div>
         </div>
 
-        {/* Right: developer workspace illustration */}
-        <div className="lg:col-span-5 animate-fade-in-up animate-delay-400">
-          <HeroCanvas className="max-w-[480px] mx-auto lg:mr-0" />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ───────── Statistics ───────── */
-const STAT_DETAILS = {
-  Projects: { icon: Rocket, to: '/projects' },
-  Events: { icon: Calendar, to: '/events' },
-  Workshops: { icon: BookOpen },
-};
-
-function StatCard({ value, label, icon: Icon, highlight = false, sample = false }) {
-  return (
-    <div
-      className={`flex h-full flex-col justify-between gap-6 rounded-xl border p-5 transition-colors duration-200 ${
-        highlight
-          ? 'border-accent bg-accent text-bg-primary'
-          : 'border-border bg-bg-card text-text-primary group-hover:border-accent/60'
-      }`}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <span
-          className={`text-[11px] font-mono font-bold uppercase tracking-[0.18em] ${
-            highlight ? '' : 'text-text-muted'
-          }`}
-        >
-          {label}
-        </span>
-        <Icon size={18} aria-hidden="true" className={highlight ? '' : 'text-accent'} />
-      </div>
-      <div>
-        <p className="font-display font-bold text-4xl sm:text-5xl leading-none tracking-[-0.04em]">
-          {value}
-        </p>
-        {sample && <p className="mt-2 text-[11px] font-mono text-text-muted">Sample figure</p>}
-      </div>
-    </div>
-  );
-}
-
-function Stats() {
-  // Members comes from the backend (real team size); the rest are from stats.js.
-  const team = useApiData(getTeam);
-  const memberCount = team.data?.count;
-  const members = {
-    value: team.loading ? '…' : memberCount != null ? String(memberCount) : '—',
-    label: memberCount === 1 ? 'Member' : 'Members',
-  };
-
-  const items = [
-    { ...members, icon: Users, to: '/team', highlight: true },
-    ...OTHER_STATS.map((stat) => ({ ...stat, ...(STAT_DETAILS[stat.label] || { icon: Zap }) })),
-  ];
-
-  return (
-    <section className="pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8">
-      <div className={container}>
-        <ul className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {items.map((item, index) => (
-            <Reveal as="li" key={item.label} delay={index * 60} className="h-full">
-              {item.to ? (
-                <Link to={item.to} className="group block h-full rounded-xl" aria-label={`${item.value} ${item.label}${item.sample ? ' (sample figure)' : ''}`}>
-                  <StatCard {...item} />
-                </Link>
-              ) : (
-                <StatCard {...item} />
-              )}
-            </Reveal>
-          ))}
-        </ul>
+        {/* Table of contents */}
+        <nav aria-label="On this page" className="mt-16 sm:mt-24">
+          <ol className="grid grid-cols-2 md:grid-cols-4 border-t border-ink">
+            {CONTENTS.map((item) => (
+              <li
+                key={item.href}
+                className="border-b border-border md:border-b-0 md:border-r last:border-r-0 md:[&:first-child>a]:pl-0"
+              >
+                <a
+                  href={item.href}
+                  className="group flex items-baseline justify-between gap-3 py-4 sm:py-5 pr-4 md:pl-4 transition-colors hover:text-accent-ink"
+                >
+                  <span className="font-display text-xl sm:text-2xl tracking-[-0.02em]">{item.label}</span>
+                  <span className="eyebrow group-hover:!text-accent-ink">{item.number}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
       </div>
     </section>
   );
@@ -160,136 +95,186 @@ function Stats() {
 
 /* ───────── About ───────── */
 function About() {
-  const pillars = [
-    {
-      icon: Terminal,
-      title: 'Our Mission',
-      text: 'To create a welcoming space where students can learn, experiment with technology and develop their skills through hands-on projects, workshops and peer collaboration.',
-    },
-    {
-      icon: Rocket,
-      title: 'Our Vision',
-      text: 'To build the most active student developer community on campus — a place where every member ships real code, shares knowledge and grows their technical identity.',
-    },
-  ];
-
   return (
-    <section className={section}>
-      <div className={container}>
-        <SectionHeading
-          align="left"
-          badge="About Us"
-          title="What is Code2Chill?"
-          description="Code2Chill is a university developer community where students collaborate, explore new technologies and build real projects together."
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {pillars.map((pillar, index) => (
-            <Reveal key={pillar.title} delay={index * 80} className="h-full">
-              <article className={`${card} transition-colors duration-200 hover:border-accent/50`}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 shrink-0 rounded-lg bg-accent/10 flex items-center justify-center">
-                    <pillar.icon size={20} className="text-accent" aria-hidden="true" />
-                  </div>
-                  <h3 className="text-xl font-bold text-text-primary">{pillar.title}</h3>
-                </div>
-                <p className="text-text-secondary text-sm sm:text-base leading-relaxed">{pillar.text}</p>
-              </article>
-            </Reveal>
-          ))}
+    <section id="about" className="scroll-mt-20 py-20 sm:py-28">
+      <div className="wrap">
+        <SectionLabel number="01">About</SectionLabel>
+        <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <h2 className="lg:col-span-3 eyebrow !text-text-primary !text-xs pt-2">What is Code2Chill?</h2>
+          <p className="lg:col-span-9 display-md text-text-primary">
+            A university developer community where students collaborate, explore new technologies and{' '}
+            <em className="text-accent-ink">build real projects together.</em>
+          </p>
         </div>
-      </div>
-    </section>
-  );
-}
 
-/* ───────── What We Do ───────── */
-function WhatWeDo() {
-  const activities = [
-    {
-      icon: Code2,
-      title: 'Coding Sessions',
-      description: 'Solve problems and build projects together.',
-    },
-    {
-      icon: Calendar,
-      title: 'Tech Events',
-      description: 'Explore hackathons, tech talks and community events.',
-    },
-    {
-      icon: BookOpen,
-      title: 'Workshops',
-      description: 'Learn practical skills through hands-on sessions.',
-    },
-    {
-      icon: Users,
-      title: 'Mentorship',
-      description: 'Get guidance on projects and technical growth.',
-    },
-    {
-      icon: Globe,
-      title: 'Open Source',
-      description: 'Contribute to projects that solve real problems.',
-    },
-    {
-      icon: Trophy,
-      title: 'Competitions',
-      description: 'Participate in coding contests and hackathons.',
-    },
-  ];
-
-  return (
-    <section className={section}>
-      <div className={container}>
-        <SectionHeading
-          align="left"
-          badge="What We Do"
-          title="Explore, Build and Grow"
-          description="From weekly coding sessions to inter-college hackathons — there's always something happening at Code2Chill."
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {activities.map((activity, index) => (
-            <Reveal key={activity.title} delay={(index % 3) * 60} className="h-full">
-              <article className="flex h-full items-start gap-3 rounded-xl border border-border bg-bg-card p-4 transition-colors duration-200 hover:border-accent/50">
-                <div className="w-9 h-9 shrink-0 rounded-lg bg-accent/10 flex items-center justify-center">
-                  <activity.icon size={18} className="text-accent" aria-hidden="true" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-base font-bold text-text-primary leading-tight mb-1">{activity.title}</h3>
-                  <p className="text-text-secondary text-sm leading-snug">{activity.description}</p>
-                </div>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ───────── Call to action ───────── */
-function CallToAction() {
-  return (
-    <section className={section}>
-      <Reveal className={container}>
-        <div className="rounded-2xl bg-accent text-bg-primary p-6 sm:p-8 lg:p-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-3">Ready to start building?</h2>
-            <p className="text-base sm:text-lg text-bg-primary/80 font-medium">
-              Join Code2Chill and become part of a community that codes, creates
-              and collaborates. No experience required — just curiosity.
+        <div className="mt-14 sm:mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
+          <div className="lg:col-start-4 lg:col-span-4 border-t border-border pt-5">
+            <h3 className="eyebrow mb-3">Our mission</h3>
+            <p className="text-text-secondary leading-relaxed">
+              To create a welcoming space where students can learn, experiment with technology and develop
+              their skills through hands-on projects, workshops and peer collaboration.
             </p>
           </div>
-          <Link
-            to="/join"
-            className="group shrink-0 self-start lg:self-auto inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-bg-primary text-accent font-display font-bold text-base transition-colors duration-150 hover:bg-bg-secondary"
-          >
-            Join Us Today
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-          </Link>
+          <div className="lg:col-span-4 lg:col-start-9 border-t border-border pt-5">
+            <h3 className="eyebrow mb-3">Our vision</h3>
+            <p className="text-text-secondary leading-relaxed">
+              To build the most active student developer community on campus — a place where every member
+              ships real code, shares knowledge and grows their technical identity.
+            </p>
+          </div>
         </div>
-      </Reveal>
+
+        {/* What we do */}
+        <div className="mt-20 sm:mt-28 grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-3">
+            <h3 className="display-sm text-text-primary">What we do</h3>
+            <p className="mt-3 text-sm text-text-secondary leading-relaxed">
+              From weekly coding sessions to inter-college hackathons.
+            </p>
+          </div>
+          <ol className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8">
+            {ACTIVITIES.map((activity, index) => (
+              <li key={activity.title} className="border-t border-border py-5">
+                <p className="eyebrow mb-3" aria-hidden="true">
+                  {String(index + 1).padStart(2, '0')}
+                </p>
+                <h4 className="font-display text-xl tracking-[-0.02em] text-text-primary mb-1">{activity.title}</h4>
+                <p className="text-sm text-text-secondary leading-relaxed">{activity.text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───────── Events ───────── */
+function EventsSection() {
+  const events = useApiData(getEvents);
+
+  return (
+    <section id="events" className="scroll-mt-20 py-20 sm:py-28 bg-bg-secondary">
+      <div className="wrap">
+        <SectionLabel number="02">Events</SectionLabel>
+        <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-4">
+            <h2 className="display-lg text-text-primary">
+              On the <em className="text-accent">calendar</em>
+            </h2>
+            <p className="mt-5 text-text-secondary leading-relaxed max-w-sm">
+              Hackathons, workshops, tech talks and meetups run by the club.
+            </p>
+            <div className="mt-8">
+              <ArrowLink to="/events">All events</ArrowLink>
+            </div>
+          </div>
+          <div className="lg:col-span-8">
+            <ApiBlock query={events} loadingLabel="Loading events…">
+              {(data) => <EventListings events={data?.events} limit={3} />}
+            </ApiBlock>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───────── Projects ───────── */
+function ProjectsSection() {
+  const projects = useApiData(getProjects);
+
+  return (
+    <section id="projects" className="scroll-mt-20 py-20 sm:py-28">
+      <div className="wrap">
+        <SectionLabel number="03">Projects</SectionLabel>
+        <div className="mt-10 sm:mt-14 mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+          <h2 className="display-lg text-text-primary max-w-3xl">
+            Made by <em className="text-accent">members</em>
+          </h2>
+          <ArrowLink to="/projects">All projects</ArrowLink>
+        </div>
+        <ApiBlock query={projects} loadingLabel="Loading projects…">
+          {(data) => <ProjectSpread projects={data?.projects} limit={3} />}
+        </ApiBlock>
+      </div>
+    </section>
+  );
+}
+
+/* ───────── Team ───────── */
+function TeamSection() {
+  const team = useApiData(getTeam);
+
+  return (
+    <section id="team" className="scroll-mt-20 py-20 sm:py-28 border-t border-border">
+      <div className="wrap">
+        <SectionLabel number="04">Team</SectionLabel>
+        <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-4">
+            <h2 className="display-lg text-text-primary">
+              The <em className="text-accent">people</em>
+            </h2>
+            <p className="mt-5 text-text-secondary leading-relaxed max-w-sm">
+              The students who run Code2Chill.
+            </p>
+            <div className="mt-8">
+              <ArrowLink to="/team">Meet the team</ArrowLink>
+            </div>
+          </div>
+          <div className="lg:col-span-8">
+            <ApiBlock query={team} loadingLabel="Loading team…">
+              {(data) => <TeamRoster leads={data?.leads} core={data?.core} />}
+            </ApiBlock>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───────── Join (ink band) ───────── */
+function JoinBand() {
+  return (
+    <section className="bg-ink text-paper py-20 sm:py-28">
+      <div className="wrap">
+        <SectionLabel tone="paper">Join</SectionLabel>
+        <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
+          <h2 className="lg:col-span-8 display-lg text-paper">
+            Ready to start <em className="text-accent">building?</em>
+          </h2>
+          <div className="lg:col-span-4">
+            <p className="text-paper/80 leading-relaxed mb-8">
+              Join Code2Chill and become part of a community that codes, creates and collaborates. No
+              experience required — just curiosity.
+            </p>
+            <Button to="/join">
+              Join Us Today
+              <ArrowRight size={16} aria-hidden="true" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-16 sm:mt-20 pt-6 border-t border-paper/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <p className="text-sm text-paper/70">Event announcements and community news</p>
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tap gap-3 font-display text-2xl tracking-[-0.02em] text-paper hover:text-accent transition-colors"
+          >
+            <InstagramIcon size={20} />
+            {INSTAGRAM_HANDLE}
+          </a>
+        </div>
+
+        <p className="mt-10 text-sm text-paper/70">
+          Already a member?{' '}
+          <Link to="/login" className="link-quiet text-paper">
+            Log in
+          </Link>
+        </p>
+      </div>
     </section>
   );
 }
@@ -310,11 +295,12 @@ function Home() {
 
   return (
     <>
-      <Hero />
-      <Stats />
+      <Cover />
       <About />
-      <WhatWeDo />
-      <CallToAction />
+      <EventsSection />
+      <ProjectsSection />
+      <TeamSection />
+      <JoinBand />
     </>
   );
 }
