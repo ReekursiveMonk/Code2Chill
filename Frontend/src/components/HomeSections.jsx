@@ -208,8 +208,12 @@ function ProjectLinks({ project }) {
   );
 }
 
-/** One large lead project plus a short column of others (asymmetric 7/5). */
-export function ProjectSpread({ projects = [], limit = 3 }) {
+/**
+ * One large lead project plus a short column of others (asymmetric 7/5).
+ * `showLeadVisual={false}` drops the sage title block (used where the page
+ * already shows a preview image above the list).
+ */
+export function ProjectSpread({ projects = [], limit = 3, showLeadVisual = true }) {
   if (projects.length === 0) {
     return <p className="py-8 text-text-secondary">No projects have been published yet.</p>;
   }
@@ -219,24 +223,26 @@ export function ProjectSpread({ projects = [], limit = 3 }) {
   return (
     <div className="@container">
     <div className="grid grid-cols-1 @3xl:grid-cols-12 gap-10 @3xl:gap-12">
-      <article className="@3xl:col-span-7">
-        <div className="aspect-[2/1] @3xl:aspect-[16/10] bg-sage flex items-end p-6 sm:p-8 mb-6">
-          <p className="font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.9] tracking-[-0.04em] text-ink">
-            {lead.title}
-          </p>
-        </div>
+      <article className={`@3xl:col-span-7 ${showLeadVisual ? '' : 'border-t border-ink pt-6'}`}>
+        {showLeadVisual && (
+          <div className="aspect-[2/1] @3xl:aspect-[16/10] bg-sage flex items-end p-6 sm:p-8 mb-6">
+            <p className="font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.9] tracking-[-0.04em] text-ink">
+              {lead.title}
+            </p>
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-3 mb-3">
           <span className="eyebrow !text-accent-ink">{lead.category}</span>
           {lead.isSample && <SampleBadge />}
         </div>
-        <h3 className="sr-only">{lead.title}</h3>
+        <h3 className={showLeadVisual ? 'sr-only' : 'display-md text-text-primary mb-4'}>{lead.title}</h3>
         <p className="text-text-secondary leading-relaxed max-w-xl mb-4">{lead.description}</p>
         <TechList tech={lead.tech} />
         <ProjectLinks project={lead} />
       </article>
 
       {rest.length > 0 && (
-        <ul className="@3xl:col-span-5 @3xl:pt-2">
+        <ul className={`@3xl:col-span-5 ${showLeadVisual ? '@3xl:pt-2' : ''}`}>
           {rest.map((project) => (
             <li key={project.id} className="py-6 border-t border-border first:border-ink">
               <div className="flex flex-wrap items-center gap-3 mb-2">

@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import Button from '../components/Button';
 import ArrowLink from '../components/ArrowLink';
 import MemberHome from '../components/MemberHome';
+import SitePreview from '../components/SitePreview';
 import { PageLoading } from '../components/DataState';
 import {
   ApiBlock,
@@ -70,19 +71,25 @@ function Cover() {
         </div>
 
         {/* Table of contents */}
-        <nav aria-label="On this page" className="mt-16 sm:mt-24">
-          <ol className="grid grid-cols-2 md:grid-cols-4 border-t border-ink">
+        <nav aria-label="On this page" className="mt-12 sm:mt-16">
+          <ol className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             {CONTENTS.map((item) => (
-              <li
-                key={item.href}
-                className="border-b border-border md:border-b-0 md:border-r last:border-r-0 md:[&:first-child>a]:pl-0"
-              >
+              <li key={item.href}>
                 <a
                   href={item.href}
-                  className="group flex items-baseline justify-between gap-3 py-4 sm:py-5 pr-4 md:pl-4 transition-colors hover:text-accent-ink"
+                  className="group flex h-full min-h-[6.5rem] sm:min-h-[8rem] flex-col justify-between gap-6 border border-border bg-bg-card p-4 sm:p-5 transition-colors duration-200 hover:border-ink hover:bg-sage/35 focus-visible:border-ink"
                 >
-                  <span className="font-display text-xl sm:text-2xl tracking-[-0.02em]">{item.label}</span>
-                  <span className="eyebrow group-hover:!text-accent-ink">{item.number}</span>
+                  <span className="flex items-center justify-between">
+                    <span className="eyebrow transition-colors group-hover:!text-accent-ink">{item.number}</span>
+                    <ArrowRight
+                      size={16}
+                      aria-hidden="true"
+                      className="rotate-90 text-text-muted transition-[transform,color] duration-200 group-hover:translate-y-0.5 group-hover:text-accent-ink"
+                    />
+                  </span>
+                  <span className="font-display text-2xl sm:text-3xl tracking-[-0.03em] text-text-primary">
+                    {item.label}
+                  </span>
                 </a>
               </li>
             ))}
@@ -96,7 +103,7 @@ function Cover() {
 /* ───────── About ───────── */
 function About() {
   return (
-    <section id="about" className="scroll-mt-20 py-20 sm:py-28">
+    <section id="about" className="scroll-mt-20 pt-12 sm:pt-14 pb-20 sm:pb-28">
       <div className="wrap">
         <SectionLabel number="01">About</SectionLabel>
         <div className="mt-10 sm:mt-14 grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -188,15 +195,26 @@ function ProjectsSection() {
     <section id="projects" className="scroll-mt-20 py-20 sm:py-28">
       <div className="wrap">
         <SectionLabel number="03">Projects</SectionLabel>
-        <div className="mt-10 sm:mt-14 mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-          <h2 className="display-lg text-text-primary max-w-3xl">
-            Made by <em className="text-accent">members</em>
+        <div className="mt-10 sm:mt-14 mx-auto max-w-3xl text-center">
+          <h2 className="display-lg text-text-primary">
+            Projects made by the <em className="text-accent">team</em>
           </h2>
-          <ArrowLink to="/projects">All projects</ArrowLink>
+          <p className="lede mx-auto mt-5">
+            Projects built by Code2Chill members. From web apps and mobile tools to AI experiments and CLI
+            utilities.
+          </p>
+          <div className="mt-6 flex justify-center">
+            <ArrowLink to="/projects">All projects</ArrowLink>
+          </div>
         </div>
-        <ApiBlock query={projects} loadingLabel="Loading projects…">
-          {(data) => <ProjectSpread projects={data?.projects} limit={3} />}
-        </ApiBlock>
+
+        <SitePreview className="mt-12 sm:mt-16" />
+
+        <div className="mt-16 sm:mt-20">
+          <ApiBlock query={projects} loadingLabel="Loading projects…">
+            {(data) => <ProjectSpread projects={data?.projects} limit={3} showLeadVisual={false} />}
+          </ApiBlock>
+        </div>
       </div>
     </section>
   );
